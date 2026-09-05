@@ -29,6 +29,8 @@ try {
     Assert-Contains ([IO.File]::ReadAllText($log)) 'screen-off'
     Set-Clock 9900
     Assert-Contains ([IO.File]::ReadAllText($log)) 'warning:15'
+    $hostProcess = Get-Process -Name 'easyshut-window' | Where-Object { $_.Path -eq (Join-Path $testDir 'easyshut-window.exe') }
+    if (-not $hostProcess -or $hostProcess.MainWindowHandle -eq 0) { throw 'The background-session warning is not visible.' }
     Set-Clock 10740
     Assert-Contains ([IO.File]::ReadAllText($log)) 'warning:1'
     Assert-Contains (Invoke-Cli @('+1')) '01:01:00'

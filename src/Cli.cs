@@ -41,7 +41,7 @@ namespace EasyShut
                                 // A WinExe host also stays independent when its terminal closes.
                                 using (var child = Process.Start(new ProcessStartInfo(host, "--background")
                                 {
-                                    UseShellExecute = true, WindowStyle = ProcessWindowStyle.Hidden,
+                                    UseShellExecute = true,
                                     WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory
                                 })) { }
                                 var wait = Stopwatch.StartNew();
