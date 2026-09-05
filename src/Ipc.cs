@@ -22,7 +22,7 @@ namespace EasyShut
         {
             get
             {
-                string name = "easyshut.v1." + WindowsIdentity.GetCurrent().User.Value + "." + Process.GetCurrentProcess().SessionId;
+                string name = "EasyShut.v1." + WindowsIdentity.GetCurrent().User.Value + "." + Process.GetCurrentProcess().SessionId;
 #if TESTING
                 name += ".test";
 #endif
@@ -46,11 +46,11 @@ namespace EasyShut
                     string[] encoded = Array.ConvertAll(args, Encode);
                     writer.WriteLine(string.Join("\t", encoded));
                     var read = reader.ReadLineAsync();
-                    if (!read.Wait(8000)) throw new IOException("Brak odpowiedzi easyshut. Sprawdź -status przed ponowieniem polecenia.");
+                    if (!read.Wait(8000)) throw new IOException("Brak odpowiedzi EasyShut. Sprawdź -status przed ponowieniem polecenia.");
                     string line = read.Result;
                     if (line == null) throw new IOException("Połączenie przerwane. Sprawdź -status przed ponowieniem polecenia.");
                     string[] parts = line.Split(new[] { '\t' }, 2);
-                    if (parts.Length != 2) throw new IOException("Nieprawidłowa odpowiedź easyshut.");
+                    if (parts.Length != 2) throw new IOException("Nieprawidłowa odpowiedź EasyShut.");
                     reply = new Reply { Ok = parts[0] == "OK", Message = Decode(parts[1]) };
                     return true;
                 }
@@ -67,7 +67,7 @@ namespace EasyShut
         public PipeServer(Func<string[], Reply> dispatch)
         {
             this.dispatch = dispatch;
-            var thread = new Thread(Run) { IsBackground = true, Name = "easyshut commands" };
+            var thread = new Thread(Run) { IsBackground = true, Name = "EasyShut commands" };
             thread.Start();
         }
         private void Run()

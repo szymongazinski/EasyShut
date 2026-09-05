@@ -22,7 +22,7 @@ namespace EasyShut
                     if (args.Length == 0)
                     {
                         try { Reply ignored; Ipc.TrySend(new string[0], out ignored, 3000); }
-                        catch (Exception ex) { MessageBox.Show(ex.Message, "easyshut", MessageBoxButtons.OK, MessageBoxIcon.Error); }
+                        catch (Exception ex) { MessageBox.Show(ex.Message, "EasyShut", MessageBoxButtons.OK, MessageBoxIcon.Error); }
                     }
                     return;
                 }
@@ -39,7 +39,7 @@ namespace EasyShut
                     using (var context = new HostContext(new Session(clock, power), args.Length == 0))
                         Application.Run(context);
                 }
-                catch (Exception ex) { MessageBox.Show(ex.Message, "easyshut — błąd", MessageBoxButtons.OK, MessageBoxIcon.Error); }
+                catch (Exception ex) { MessageBox.Show(ex.Message, "EasyShut — błąd", MessageBoxButtons.OK, MessageBoxIcon.Error); }
                 finally { instance.ReleaseMutex(); }
             }
         }
@@ -80,17 +80,17 @@ namespace EasyShut
         }
         private Reply Dispatch(string[] args)
         {
-            if (closing) return Reply.Error("easyshut kończy pracę. Spróbuj ponownie.");
+            if (closing) return Reply.Error("EasyShut kończy pracę. Spróbuj ponownie.");
             // Invoke marshals every session operation, including power requests, to the UI thread.
             try { return (Reply)dispatcher.Invoke(new Func<Reply>(delegate { return Handle(CommandLine.Parse(args)); })); }
             catch (Exception ex) { return Reply.Error(ex.InnerException != null ? ex.InnerException.Message : ex.Message); }
         }
         private Reply Handle(Command command)
         {
-            if (closing) return Reply.Error("easyshut kończy pracę. Spróbuj ponownie.");
+            if (closing) return Reply.Error("EasyShut kończy pracę. Spróbuj ponownie.");
             switch (command.Kind)
             {
-                case CommandKind.Show: ShowWindow(); return Reply.Success("Otwarto okno easyshut.");
+                case CommandKind.Show: ShowWindow(); return Reply.Success("Otwarto okno EasyShut.");
                 case CommandKind.Start:
                     session.Start(command); CloseWarning();
                     if (window != null) window.LoadState(session.GetSnapshot());
@@ -175,7 +175,7 @@ namespace EasyShut
 
         public MainWindow(Action<Command> onStart, Action onStop)
         {
-            Text = "easyshut";
+            Text = "EasyShut";
             Font = new Font("Segoe UI", 9F);
             AutoScaleMode = AutoScaleMode.Dpi;
             AutoSize = true; AutoSizeMode = AutoSizeMode.GrowAndShrink;
@@ -184,7 +184,7 @@ namespace EasyShut
             Icon = SystemIcons.Application;
             var root = new TableLayoutPanel { AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, ColumnCount = 1, Padding = new Padding(18), Dock = DockStyle.Fill };
             root.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 500));
-            root.Controls.Add(new Label { Text = "easyshut", AutoSize = true, Font = new Font(Font.FontFamily, 15, FontStyle.Bold), Margin = new Padding(0, 0, 0, 5) });
+            root.Controls.Add(new Label { Text = "EasyShut", AutoSize = true, Font = new Font(Font.FontFamily, 15, FontStyle.Bold), Margin = new Padding(0, 0, 0, 5) });
             root.Controls.Add(new Label { Text = "Wstrzymaj automatyczne usypianie na czas tej sesji.", AutoSize = true, Margin = new Padding(0, 0, 0, 16) });
 
             var times = new TableLayoutPanel { AutoSize = true, Dock = DockStyle.Fill, ColumnCount = 4, Padding = new Padding(10, 7, 10, 10) };
@@ -274,7 +274,7 @@ namespace EasyShut
         public void ShowError(string message) { error.Text = message; error.Visible = true; }
         private void ShowHelp()
         {
-            using (var form = new Form { Text = "easyshut — pomoc", Font = Font, Size = new Size(710, 590), StartPosition = FormStartPosition.CenterParent, MinimizeBox = false, MaximizeBox = false })
+            using (var form = new Form { Text = "EasyShut — pomoc", Font = Font, Size = new Size(710, 590), StartPosition = FormStartPosition.CenterParent, MinimizeBox = false, MaximizeBox = false })
             {
                 form.Controls.Add(new TextBox { Multiline = true, ReadOnly = true, ScrollBars = ScrollBars.Vertical, Dock = DockStyle.Fill, Text = CommandLine.Help, Font = new Font("Consolas", 10), BackColor = SystemColors.Window });
                 form.ShowDialog(this);
@@ -288,7 +288,7 @@ namespace EasyShut
         private readonly Label detail = new Label { AutoSize = true, MaximumSize = new Size(420, 0) };
         public WarningWindow(int minutes, Action cancel)
         {
-            Text = "easyshut — ostrzeżenie";
+            Text = "EasyShut — ostrzeżenie";
             Font = new Font("Segoe UI", 9);
             AutoScaleMode = AutoScaleMode.Dpi;
             FormBorderStyle = FormBorderStyle.FixedDialog; MaximizeBox = MinimizeBox = false;

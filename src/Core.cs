@@ -18,12 +18,12 @@ namespace EasyShut
 
     public static class CommandLine
     {
-        public const string Help = @"easyshut — czasowa blokada automatycznego usypiania Windows
+        public const string Help = @"EasyShut — czasowa blokada automatycznego usypiania Windows
 
-  easyshut                          Otwórz okno ustawień.
-  easyshut <godziny> [flagi]         Rozpocznij odliczanie w tle.
-  easyshut -n [flagi]                Blokuj usypianie bez limitu czasu.
-  easyshut +<godziny>                Dodaj czas do aktywnego odliczania.
+  EasyShut                          Otwórz okno ustawień.
+  EasyShut <godziny> [flagi]         Rozpocznij odliczanie w tle.
+  EasyShut -n [flagi]                Blokuj usypianie bez limitu czasu.
+  EasyShut +<godziny>                Dodaj czas do aktywnego odliczania.
 
 Flagi:
   -help             Pokaż tę pomoc.
@@ -36,10 +36,10 @@ Flagi:
   -stop             Anuluj sesję i zwolnij blokadę usypiania.
 
 Przykłady:
-  easyshut 0.25
-  easyshut 1,5 -sleep -screen_on
-  easyshut -n -screen_on
-  easyshut +1
+  EasyShut 0.25
+  EasyShut 1,5 -sleep -screen_on
+  EasyShut -n -screen_on
+  EasyShut +1
 
 Godziny: dodatnia liczba, kropka lub przecinek dziesiętny, minimum 1 s.
 Liczba godzin musi być pierwszym argumentem. +godziny występuje osobno.
@@ -92,7 +92,7 @@ Ustawienia Windows pozostają bez zmian. Brak autostartu i zapisu sesji.";
                     case "-shut": if (shut) Duplicate("-shut"); shut = true; break;
                     case "-sleep": if (sleep) Duplicate("-sleep"); sleep = true; break;
                     case "-screen_on": if (screen) Duplicate("-screen_on"); screen = true; break;
-                    default: throw new ArgumentException("Nieznany argument: " + args[i] + ". Użyj easyshut -help.");
+                    default: throw new ArgumentException("Nieznany argument: " + args[i] + ". Użyj EasyShut -help.");
                 }
             }
             if (shut && sleep) throw new ArgumentException("Nie można łączyć -shut i -sleep.");
@@ -161,7 +161,7 @@ Ustawienia Windows pozostają bez zmian. Brak autostartu i zapisu sesji.";
 
         public bool Extend(TimeSpan amount)
         {
-            if (!active) throw new InvalidOperationException("Brak aktywnej sesji. Najpierw uruchom easyshut z czasem lub -n.");
+            if (!active) throw new InvalidOperationException("Brak aktywnej sesji. Najpierw uruchom EasyShut z czasem lub -n.");
             if (!deadline.HasValue) return false;
             if (amount < TimeSpan.FromSeconds(1) || total.Value.TotalHours + amount.TotalHours > 876000)
                 throw new ArgumentException("Łączny czas nie może przekroczyć 876000 godzin; dodaj co najmniej 1 sekundę.");

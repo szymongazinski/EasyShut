@@ -24,7 +24,7 @@ namespace EasyShut
                 {
                     bool owned;
                     try { owned = startup.WaitOne(12000); } catch (AbandonedMutexException) { owned = true; }
-                    if (!owned) throw new IOException("easyshut obsługuje inne polecenie. Spróbuj ponownie.");
+                    if (!owned) throw new IOException("EasyShut obsługuje inne polecenie. Spróbuj ponownie.");
                     try
                     {
                         if (!Ipc.TrySend(args, out reply, 300))
@@ -32,11 +32,11 @@ namespace EasyShut
                             if (command.Kind == CommandKind.Status || command.Kind == CommandKind.Stop)
                                 reply = Reply.Success("Brak aktywnej sesji. Obowiązują ustawienia usypiania Windows.");
                             else if (command.Kind == CommandKind.Extend)
-                                reply = Reply.Error("Brak aktywnej sesji. Najpierw uruchom easyshut z czasem lub -n.");
+                                reply = Reply.Error("Brak aktywnej sesji. Najpierw uruchom EasyShut z czasem lub -n.");
                             else
                             {
-                                string host = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "easyshut-window.exe");
-                                if (!File.Exists(host)) throw new FileNotFoundException("Brak easyshut-window.exe. Wypakuj cały pakiet easyshut.");
+                                string host = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "EasyShut-window.exe");
+                                if (!File.Exists(host)) throw new FileNotFoundException("Brak EasyShut-window.exe. Wypakuj cały pakiet EasyShut.");
                                 // ShellExecute does not inherit the CLI's redirected pipe handles.
                                 // A WinExe host also stays independent when its terminal closes.
                                 using (var child = Process.Start(new ProcessStartInfo(host, "--background")
@@ -47,7 +47,7 @@ namespace EasyShut
                                 var wait = Stopwatch.StartNew();
                                 while (!Ipc.TrySend(args, out reply, 300))
                                 {
-                                    if (wait.ElapsedMilliseconds > 10000) throw new IOException("Nie udało się uruchomić easyshut.");
+                                    if (wait.ElapsedMilliseconds > 10000) throw new IOException("Nie udało się uruchomić EasyShut.");
                                     Thread.Sleep(50);
                                 }
                             }
@@ -62,7 +62,7 @@ namespace EasyShut
                 return reply.Ok ? 0 : 1;
             }
             catch (ArgumentException ex) { Console.Error.WriteLine(ex.Message); return 2; }
-            catch (Exception ex) { Console.Error.WriteLine("easyshut: " + ex.Message); return 1; }
+            catch (Exception ex) { Console.Error.WriteLine("EasyShut: " + ex.Message); return 1; }
         }
         private static void HideOwnConsole()
         {

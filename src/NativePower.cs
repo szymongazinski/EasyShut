@@ -27,7 +27,7 @@ namespace EasyShut
         }
         private sealed class MonitorWindow : NativeWindow, IDisposable
         {
-            public MonitorWindow() { CreateHandle(new CreateParams { Caption = "easyshut power" }); }
+            public MonitorWindow() { CreateHandle(new CreateParams { Caption = "EasyShut power" }); }
             public void Dispose() { DestroyHandle(); }
         }
         public void Execute(PowerAction action)
@@ -38,7 +38,7 @@ namespace EasyShut
                 {
                     if (!SetSuspendState(false, false, false)) throw new Win32Exception(Marshal.GetLastWin32Error());
                 }
-                else if (!InitiateSystemShutdownEx(null, "easyshut: upłynął ustawiony czas.", 0, true, false, 0x80040000))
+                else if (!InitiateSystemShutdownEx(null, "EasyShut: upłynął ustawiony czas.", 0, true, false, 0x80040000))
                     throw new Win32Exception(Marshal.GetLastWin32Error());
             }
         }

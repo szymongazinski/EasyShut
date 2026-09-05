@@ -1,23 +1,20 @@
-# easyshut
+# EasyShut
 
 Mała aplikacja dla Windows 10/11, która na czas bieżącej sesji blokuje automatyczne usypianie. Może też wyłączyć lub uśpić komputer po wybranym czasie. Ma klasyczne okno Windows i obsługę z terminala.
 
-**[Pobierz gotowy program](https://github.com/szymongazinski/easyshut/releases/latest)** · [Licencja MIT](LICENSE)
+**[Pobierz gotowy program](https://github.com/szymongazinski/EasyShut/releases/latest)** · [Licencja MIT](LICENSE)
 
 ## Instalacja
 
-1. Pobierz `easyshut-1.0.0-windows.zip` z Releases i wypakuj cały pakiet.
-2. W folderze pakietu uruchom PowerShell i wpisz:
+1. **[Pobierz EasyShut-Setup.exe](https://github.com/szymongazinski/EasyShut/releases/latest/download/EasyShut-Setup.exe).**
+2. Otwórz pobrany plik **dwuklikiem** i kliknij **Zainstaluj**.
+3. Kliknij **Zakończ**. Domyślnie otworzy się okno EasyShut.
 
-   ```powershell
-   powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1
-   ```
+Nie trzeba otwierać terminala ani uruchamiać plików `.ps1`. Instalator zawiera cały program i działa bez pobierania dodatkowych plików. Przy aktualizacji najpierw zamknij EasyShut.
 
-3. Otwórz nowe okno terminala. Polecenie `easyshut` działa teraz z dowolnego katalogu. W menu Start pojawi się też skrót **easyshut**.
+Instalacja nie wymaga administratora. Pliki trafiają do `%LOCALAPPDATA%\Programs\EasyShut`. Instalator dodaje skrót **EasyShut** do menu Start, polecenie `EasyShut` do PATH bieżącego użytkownika i pozycję EasyShut na liście zainstalowanych aplikacji Windows. Aby używać polecenia, otwórz **nowe okno terminala**. Wielkość liter w poleceniach Windows nie ma znaczenia, więc dotychczasowy zapis małymi literami nadal działa.
 
-Instalacja nie wymaga administratora. Pliki trafiają do `%LOCALAPPDATA%\Programs\easyshut`, a instalator dodaje ten katalog do PATH bieżącego użytkownika. Opcja `-ExecutionPolicy Bypass` dotyczy wyłącznie uruchamianego procesu instalatora; nie zapisuje zmiany zasad PowerShell.
-
-Można też korzystać bez instalacji: `easyshut-window.exe` otwiera okno, a `easyshut.exe` obsługuje terminal. Oba pliki należy trzymać w jednym katalogu. Program korzysta z .NET Framework 4.8 dostępnego w aktualnych instalacjach Windows 10/11. Paczka nie zawiera dodatkowego środowiska, reklam ani telemetrii. Pliki EXE nie są podpisane certyfikatem wydawcy.
+Można też korzystać bez instalacji: pobierz `EasyShut-1.1.0-windows.zip` i wypakuj cały pakiet. `EasyShut-window.exe` otwiera okno, a `EasyShut.exe` obsługuje terminal. Pliki należy trzymać w jednym katalogu. Program korzysta z .NET Framework 4.8 dostępnego w aktualnych instalacjach Windows 10/11. Nie zawiera reklam ani telemetrii. Pliki EXE nie są podpisane certyfikatem wydawcy.
 
 ## Okno
 
@@ -32,17 +29,17 @@ Można też korzystać bez instalacji: `easyshut-window.exe` otwiera okno, a `ea
 ## Terminal
 
 ```text
-easyshut                              Otwórz okno (lub przywołaj już otwarte).
-easyshut 0.25                         Wyłącz za 15 minut; zgaś ekran po 5 s.
-easyshut 1.5 -sleep                    Uśpij za 90 minut; zgaś ekran po 5 s.
-easyshut 1,5 -sleep -screen_on          Uśpij za 90 minut; utrzymuj ekran włączony.
-easyshut -n                            Nigdy nie wyłączaj; zgaś ekran po 5 s.
-easyshut -n -screen_on                 Blokuj usypianie i utrzymuj ekran włączony.
-easyshut +1                            Dodaj godzinę do bieżącego odliczania.
-easyshut +0,5                          Dodaj pół godziny.
-easyshut -status                       Sprawdź stan i planowaną godzinę akcji.
-easyshut -stop                         Anuluj sesję.
-easyshut -help                         Wyświetl wszystkie flagi.
+EasyShut                              Otwórz okno (lub przywołaj już otwarte).
+EasyShut 0.25                         Wyłącz za 15 minut; zgaś ekran po 5 s.
+EasyShut 1.5 -sleep                    Uśpij za 90 minut; zgaś ekran po 5 s.
+EasyShut 1,5 -sleep -screen_on          Uśpij za 90 minut; utrzymuj ekran włączony.
+EasyShut -n                            Nigdy nie wyłączaj; zgaś ekran po 5 s.
+EasyShut -n -screen_on                 Blokuj usypianie i utrzymuj ekran włączony.
+EasyShut +1                            Dodaj godzinę do bieżącego odliczania.
+EasyShut +0,5                          Dodaj pół godziny.
+EasyShut -status                       Sprawdź stan i planowaną godzinę akcji.
+EasyShut -stop                         Anuluj sesję.
+EasyShut -help                         Wyświetl wszystkie flagi.
 ```
 
 | Argument | Znaczenie |
@@ -57,7 +54,7 @@ easyshut -help                         Wyświetl wszystkie flagi.
 | `-stop` | Anulowanie i zwolnienie blokady usypiania. |
 | `-help` | Pomoc. Działają też `--help`, `-h` i `/?`. |
 
-Polecenia z argumentami działają w tle i oddają terminal. Zamknięcie terminala nie anuluje sesji. Aby ją zakończyć, użyj `-stop` lub otwórz główne okno przez `easyshut` i zamknij je. Nie ma ikony w zasobniku ani autostartu.
+Polecenia z argumentami działają w tle i oddają terminal. Zamknięcie terminala nie anuluje sesji. Aby ją zakończyć, użyj `-stop` lub otwórz główne okno przez `EasyShut` i zamknij je. Nie ma ikony w zasobniku ani autostartu.
 
 Kolejne polecenie z czasem lub `-n` **zastępuje** ustawienia i zaczyna od nowa. `+godziny` dodaje czas do aktualnego terminu, zachowując akcję i zachowanie ekranu; w trybie **Nigdy** nic nie zmienia. Bez aktywnej sesji zgłasza błąd. Błędne argumenty nie zmieniają bieżącej sesji.
 
@@ -84,13 +81,9 @@ Obsługa usypiania i ekranu zależy też od sprzętu, sterowników oraz polityk 
 
 ## Odinstalowanie
 
-Zakończ sesję i zamknij easyshut, a następnie:
+Zamknij EasyShut, znajdź go w **Ustawienia → Aplikacje → Zainstalowane aplikacje** i wybierz **Odinstaluj**. Możesz też dwukrotnie kliknąć `EasyShut-uninstall.exe` w katalogu instalacji.
 
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File "$env:LOCALAPPDATA\Programs\easyshut\uninstall.ps1"
-```
-
-Usuwane są pliki pakietu, skrót w menu Start i wpis w PATH. Inne pliki w katalogu pozostają nietknięte.
+Usuwane są pliki programu, skrót w menu Start i wpis w PATH. Inne pliki w katalogu pozostają nietknięte. Wersję przenośną z ZIP wystarczy zamknąć i usunąć jej wypakowany folder.
 
 ## Budowanie i testy
 
@@ -101,9 +94,10 @@ Kompilacja korzysta z `csc.exe` dostarczanego z .NET Framework. Nie pobiera paki
 .\scripts\test.ps1               # testy parsera i logiki czasu, z atrapą zasilania
 .\scripts\integration-test.ps1   # rzeczywiste procesy CLI/GUI i IPC, atrapa zasilania
 .\scripts\native-smoke.ps1       # rzeczywista blokada/zwolnienie, bez wyłączania PC
-.\scripts\package.ps1            # gotowy ZIP i SHA256SUMS.txt w dist
+.\scripts\installer-test.ps1     # instalacja, aktualizacja, wycofanie błędu i usuwanie plików
+.\scripts\package.ps1            # instalator EXE, wersja przenośna ZIP i SHA256SUMS.txt
 ```
 
 Testy integracyjne używają osobno kompilowanego backendu (`TESTING`) i osobnego kanału IPC. Ten backend nie zawiera kodu wyłączania, usypiania ani gaszenia ekranu; zapisuje tylko zdarzenia i pozwala symulować upływ czasu. Produkcyjne pliki EXE nie zawierają zegara testowego ani przełącznika wyłączającego rzeczywiste akcje.
 
-`Core.cs` zawiera parser i maszynę stanów sesji, `Ipc.cs` komunikację w ramach tego samego konta i sesji logowania, `Cli.cs` polecenia terminalowe, `Gui.cs` okna i obsługę w tle, a `NativePower.cs` wywołania Windows. Licznik i żądanie zasilania należą do jednego wątku; nie ma zapisanych harmonogramów, zadań systemowych, usług ani połączeń sieciowych.
+`Core.cs` zawiera parser i maszynę stanów sesji, `Ipc.cs` komunikację w ramach tego samego konta i sesji logowania, `Cli.cs` polecenia terminalowe, `Gui.cs` okna i obsługę w tle, `NativePower.cs` wywołania Windows, a `Setup.cs` instalator i deinstalator. Licznik i żądanie zasilania należą do jednego wątku; nie ma zapisanych harmonogramów, zadań systemowych, usług ani połączeń sieciowych. Instalator pozwala też na wdrożenie przez `EasyShut-Setup.exe --install-silent` (kod wyjścia 0 oznacza sukces).

@@ -2,7 +2,7 @@
 $repo = Split-Path $PSScriptRoot -Parent
 & "$PSScriptRoot\build.ps1" -TestBuild
 $testDir = Join-Path $repo 'build\test'
-$cli = Join-Path $testDir 'easyshut.exe'
+$cli = Join-Path $testDir 'EasyShut.exe'
 $clock = Join-Path $testDir 'clock.txt'
 $log = Join-Path $testDir 'events.txt'
 $env:EASYSHUT_TEST_CLOCK = $clock
@@ -29,7 +29,7 @@ try {
     Assert-Contains ([IO.File]::ReadAllText($log)) 'screen-off'
     Set-Clock 9900
     Assert-Contains ([IO.File]::ReadAllText($log)) 'warning:15'
-    $hostProcess = Get-Process -Name 'easyshut-window' | Where-Object { $_.Path -eq (Join-Path $testDir 'easyshut-window.exe') }
+    $hostProcess = Get-Process -Name 'EasyShut-window' | Where-Object { $_.Path -eq (Join-Path $testDir 'EasyShut-window.exe') }
     if (-not $hostProcess -or $hostProcess.MainWindowHandle -eq 0) { throw 'The background-session warning is not visible.' }
     Set-Clock 10740
     Assert-Contains ([IO.File]::ReadAllText($log)) 'warning:1'
@@ -58,7 +58,7 @@ try {
 } finally {
     & $cli -stop | Out-Null
     # Only terminate the isolated test backend. It contains no native power code.
-    Get-Process -Name 'easyshut-window' -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq (Join-Path $testDir 'easyshut-window.exe') } | Stop-Process
+    Get-Process -Name 'EasyShut-window' -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq (Join-Path $testDir 'EasyShut-window.exe') } | Stop-Process
     Remove-Item Env:\EASYSHUT_TEST_CLOCK -ErrorAction SilentlyContinue
     Remove-Item Env:\EASYSHUT_TEST_LOG -ErrorAction SilentlyContinue
 }

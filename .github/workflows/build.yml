@@ -15,9 +15,13 @@ jobs:
       - name: Build and package
         shell: pwsh
         run: ./scripts/package.ps1
+      - name: Test installer
+        shell: pwsh
+        run: ./scripts/installer-test.ps1
       - uses: actions/upload-artifact@v4
         with:
-          name: easyshut-windows
+          name: EasyShut-windows
           path: |
-            dist/easyshut-1.0.0-windows.zip
+            dist/EasyShut-Setup.exe
+            dist/EasyShut-1.1.0-windows.zip
             dist/SHA256SUMS.txt
