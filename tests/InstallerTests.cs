@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using EasyShut;
 
 internal static class InstallerTests
@@ -26,6 +27,40 @@ internal static class InstallerTests
             if (Directory.Exists(folder) && !Directory.EnumerateFileSystemEntries(folder).Any()) Directory.Delete(folder);
         }
     }
+    private static void WithShortcuts(Action<string, string, string> action)
+    {
+        string root = Path.Combine(Path.GetTempPath(), "EasyShut-shortcuts-" + Guid.NewGuid().ToString("N"));
+        string app = Path.Combine(root, "app"), programs = Path.Combine(root, "programs"), desktop = Path.Combine(root, "redirected desktop");
+        foreach (string folder in new[] { app, programs, desktop }) Directory.CreateDirectory(folder);
+        File.WriteAllBytes(Path.Combine(app, "EasyShut-window.exe"), new byte[] { 77, 90 });
+        try { action(app, programs, desktop); }
+        finally
+        {
+            foreach (string folder in new[] { app, programs, desktop })
+            {
+                foreach (string name in new[] { "EasyShut.lnk", "EasyShut-window.exe" }) File.Delete(Path.Combine(folder, name));
+                Directory.Delete(folder);
+            }
+            Directory.Delete(root);
+        }
+    }
+    private static string ShortcutIdentity(string path)
+    {
+        dynamic shell = Activator.CreateInstance(Type.GetTypeFromProgID("Shell.Application"));
+        try
+        {
+            dynamic folder = shell.NameSpace(Path.GetDirectoryName(path));
+            try
+            {
+                dynamic item = folder.ParseName(Path.GetFileName(path));
+                try { return (string)item.ExtendedProperty("System.AppUserModel.ID"); }
+                finally { Marshal.FinalReleaseComObject(item); }
+            }
+            finally { Marshal.FinalReleaseComObject(folder); }
+        }
+        finally { Marshal.FinalReleaseComObject(shell); }
+    }
+    [STAThread]
     private static int Main()
     {
         Test("embedded installer extracts a complete standalone application", delegate
@@ -113,6 +148,68 @@ internal static class InstallerTests
             Check(result == @"%USERPROFILE%\bin;C:\Tools;" + target, "Unexpected PATH: " + result);
             Check(Installation.UpdatePath(result, target, true) == result, "Reinstall duplicates PATH");
             Check(Installation.UpdatePath(result, target, false) == @"%USERPROFILE%\bin;C:\Tools", "Uninstall changes unrelated PATH entries");
+        });
+        Test("Start shortcut has a stable app identity; desktop is opt-in", delegate
+        {
+            WithShortcuts(delegate(string app, string programs, string desktop)
+            {
+                using (var shortcuts = new ShortcutRegistration(app, programs, desktop, false)) { shortcuts.Register(); shortcuts.Commit(); }
+                string start = Path.Combine(programs, "EasyShut.lnk");
+                Check(ShortcutRegistration.IsOwned(start, app), "Start target incorrect");
+                Check(ShortcutIdentity(start) == "szymongazinski.EasyShut", "Missing app identity");
+                Check(!File.Exists(Path.Combine(desktop, "EasyShut.lnk")), "Unrequested desktop shortcut");
+            });
+        });
+        Test("desktop opt-in uses the supplied redirected desktop and matching identity", delegate
+        {
+            WithShortcuts(delegate(string app, string programs, string desktop)
+            {
+                using (var shortcuts = new ShortcutRegistration(app, programs, desktop, true)) { shortcuts.Register(); shortcuts.Commit(); }
+                string link = Path.Combine(desktop, "EasyShut.lnk");
+                Check(ShortcutRegistration.IsOwned(link, app), "Desktop target incorrect");
+                Check(ShortcutIdentity(link) == "szymongazinski.EasyShut", "Desktop identity differs");
+                byte[] previous = File.ReadAllBytes(link);
+                using (var shortcuts = new ShortcutRegistration(app, programs, desktop, false)) { shortcuts.Register(); shortcuts.Commit(); }
+                Check(previous.SequenceEqual(File.ReadAllBytes(link)), "Unchecked option altered existing desktop shortcut");
+            });
+        });
+        Test("failed registration removes new shortcuts", delegate
+        {
+            WithShortcuts(delegate(string app, string programs, string desktop)
+            {
+                using (var shortcuts = new ShortcutRegistration(app, programs, desktop, true)) { shortcuts.Register(); }
+                Check(!File.Exists(Path.Combine(programs, "EasyShut.lnk")), "Start shortcut survived rollback");
+                Check(!File.Exists(Path.Combine(desktop, "EasyShut.lnk")), "Desktop shortcut survived rollback");
+            });
+        });
+        Test("failed upgrade restores both existing shortcuts byte for byte", delegate
+        {
+            WithShortcuts(delegate(string app, string programs, string desktop)
+            {
+                using (var shortcuts = new ShortcutRegistration(app, programs, desktop, true)) { shortcuts.Register(); shortcuts.Commit(); }
+                string start = Path.Combine(programs, "EasyShut.lnk"), desk = Path.Combine(desktop, "EasyShut.lnk");
+                byte[] oldStart = File.ReadAllBytes(start), oldDesk = File.ReadAllBytes(desk);
+                using (var shortcuts = new ShortcutRegistration(app, programs, desktop, true)) { shortcuts.Register(); }
+                Check(oldStart.SequenceEqual(File.ReadAllBytes(start)), "Start shortcut not restored");
+                Check(oldDesk.SequenceEqual(File.ReadAllBytes(desk)), "Desktop shortcut not restored");
+            });
+        });
+        Test("unrelated shortcuts are neither overwritten nor removed", delegate
+        {
+            WithShortcuts(delegate(string app, string programs, string desktop)
+            {
+                using (var shortcuts = new ShortcutRegistration(app, programs, desktop, true)) { shortcuts.Register(); shortcuts.Commit(); }
+                string start = Path.Combine(programs, "EasyShut.lnk"), desk = Path.Combine(desktop, "EasyShut.lnk");
+                bool rejected = false;
+                try { using (var shortcuts = new ShortcutRegistration(programs, programs, desktop, true)) { shortcuts.Register(); shortcuts.Commit(); } }
+                catch (IOException) { rejected = true; }
+                Check(rejected, "Different target was overwritten");
+                ShortcutRegistration.RemoveOwned(desk, programs);
+                Check(File.Exists(desk), "Unrelated shortcut removed");
+                ShortcutRegistration.RemoveOwned(desk, app);
+                ShortcutRegistration.RemoveOwned(start, app);
+                Check(!File.Exists(desk) && !File.Exists(start), "Owned shortcuts survived removal");
+            });
         });
         Console.WriteLine(passed + " installer tests passed, " + failed + " failed");
         return failed == 0 ? 0 : 1;

@@ -13,6 +13,7 @@ namespace EasyShut
         [STAThread]
         private static void Main(string[] args)
         {
+            AppIdentity.Initialize();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             using (var instance = new InstanceLock())

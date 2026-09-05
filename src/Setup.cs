@@ -15,7 +15,7 @@ namespace EasyShut
 {
     public static class Installation
     {
-        public const string Version = "1.2.1";
+        public const string Version = "1.2.2";
         private const string UninstallKey = @"Software\Microsoft\Windows\CurrentVersion\Uninstall\EasyShut";
         public static readonly string[] PayloadNames = {
             "EasyShut.exe", "EasyShut-window.exe", "EasyShut-uninstall.exe",
@@ -23,6 +23,7 @@ namespace EasyShut
         };
         private static readonly string[] LegacyNames = { "install.ps1", "uninstall.ps1" };
         public static string DefaultDirectory { get { return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "EasyShut"); } }
+        public static string DesktopShortcut { get { return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "EasyShut.lnk"); } }
 
         public static void RequireClosed(string directory)
         {
@@ -121,9 +122,10 @@ namespace EasyShut
             }
         }
 
-        public static void InstallDefault()
+        public static void InstallDefault() { InstallDefault(false); }
+        public static void InstallDefault(bool addDesktopShortcut)
         {
-            using (var integration = new WindowsIntegration(DefaultDirectory))
+            using (var integration = new WindowsIntegration(DefaultDirectory, addDesktopShortcut))
             {
                 InstallPayload(DefaultDirectory, integration.Register);
                 integration.Commit();
@@ -155,26 +157,27 @@ namespace EasyShut
                 RegistryValueKind kind = environment.GetValueNames().Contains("Path", StringComparer.OrdinalIgnoreCase) ? environment.GetValueKind("Path") : RegistryValueKind.ExpandString;
                 environment.SetValue("Path", UpdatePath(previous, directory, false), kind);
             }
-            if (File.Exists(shortcut)) File.Delete(shortcut);
+            ShortcutRegistration.RemoveOwned(shortcut, directory);
+            ShortcutRegistration.RemoveOwned(DesktopShortcut, directory);
             Registry.CurrentUser.DeleteSubKeyTree(UninstallKey, false);
             BroadcastEnvironment();
         }
 
         private sealed class WindowsIntegration : IDisposable
         {
-            private readonly string target, shortcut;
+            private readonly string target;
+            private readonly ShortcutRegistration shortcuts;
             private readonly string oldPath;
             private readonly RegistryValueKind pathKind;
             private readonly bool hadPath, hadKey;
-            private readonly byte[] oldShortcut;
             private readonly Dictionary<string, object> values = new Dictionary<string, object>();
             private readonly Dictionary<string, RegistryValueKind> kinds = new Dictionary<string, RegistryValueKind>();
             private bool started, committed;
-            public WindowsIntegration(string target)
+            public WindowsIntegration(string target, bool addDesktop)
             {
                 this.target = target;
-                shortcut = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Programs), "EasyShut.lnk");
-                oldShortcut = File.Exists(shortcut) ? File.ReadAllBytes(shortcut) : null;
+                shortcuts = new ShortcutRegistration(target, Environment.GetFolderPath(Environment.SpecialFolder.Programs),
+                    Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), addDesktop);
                 using (RegistryKey env = Registry.CurrentUser.OpenSubKey("Environment"))
                 {
                     hadPath = env != null && env.GetValueNames().Contains("Path", StringComparer.OrdinalIgnoreCase);
@@ -194,23 +197,7 @@ namespace EasyShut
             public void Register()
             {
                 started = true;
-                // Recreate the link so a 1.0 installation also gets the new letter case.
-                if (File.Exists(shortcut)) File.Delete(shortcut);
-                dynamic shell = Activator.CreateInstance(Type.GetTypeFromProgID("WScript.Shell"));
-                try
-                {
-                    dynamic link = shell.CreateShortcut(shortcut);
-                    try
-                    {
-                        link.TargetPath = Path.Combine(target, "EasyShut-window.exe");
-                        link.IconLocation = Path.Combine(target, "EasyShut-window.exe") + ",0";
-                        link.WorkingDirectory = target;
-                        link.Description = "EasyShut — blokada usypiania i odliczanie";
-                        link.Save();
-                    }
-                    finally { Marshal.FinalReleaseComObject(link); }
-                }
-                finally { Marshal.FinalReleaseComObject(shell); }
+                shortcuts.Register();
                 using (RegistryKey key = Registry.CurrentUser.CreateSubKey(UninstallKey))
                 {
                     key.SetValue("DisplayName", "EasyShut");
@@ -225,11 +212,11 @@ namespace EasyShut
                 using (RegistryKey env = Registry.CurrentUser.CreateSubKey("Environment"))
                     env.SetValue("Path", UpdatePath(oldPath, target, true), pathKind);
             }
-            public void Commit() { committed = true; }
+            public void Commit() { shortcuts.Commit(); committed = true; }
             public void Dispose()
             {
                 if (!started || committed) return;
-                if (oldShortcut == null) File.Delete(shortcut); else File.WriteAllBytes(shortcut, oldShortcut);
+                shortcuts.Dispose();
                 using (RegistryKey env = Registry.CurrentUser.CreateSubKey("Environment"))
                 {
                     if (hadPath) env.SetValue("Path", oldPath, pathKind); else env.DeleteValue("Path", false);
@@ -278,9 +265,11 @@ namespace EasyShut
                 Process.Start(new ProcessStartInfo(copy, "--remove \"" + folder.TrimEnd('\\') + "\" " + Process.GetCurrentProcess().Id) { UseShellExecute = true });
                 return 0;
 #else
-                if (args.Length == 1 && args[0] == "--install-silent")
+                if (args.Length > 0 && args[0] == "--install-silent")
                 {
-                    Installation.InstallDefault();
+                    if (args.Length > 2 || (args.Length == 2 && args[1] != "--desktop-shortcut"))
+                        throw new ArgumentException("Użyj --install-silent [--desktop-shortcut].");
+                    Installation.InstallDefault(args.Length == 2);
                     return 0;
                 }
                 if (args.Length != 0) throw new ArgumentException("Uruchom EasyShut-Setup.exe bez argumentów.");
@@ -291,7 +280,7 @@ namespace EasyShut
             catch (Exception ex)
             {
                 // Silent installation remains suitable for scripted deployment and returns an error code.
-                if (args.Length != 1 || args[0] != "--install-silent")
+                if (args.Length == 0 || args[0] != "--install-silent")
                     MessageBox.Show(ex.Message, "EasyShut — błąd", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return 1;
             }
@@ -317,6 +306,8 @@ namespace EasyShut
             root.Controls.Add(description);
             root.Controls.Add(new Label { Text = "Katalog instalacji:", AutoSize = true });
             root.Controls.Add(new TextBox { ReadOnly = true, Text = Installation.DefaultDirectory, Width = 470, Margin = new Padding(0, 4, 0, 14) });
+            var desktop = new CheckBox { Text = "Dodaj skrót na pulpicie", AutoSize = true, Checked = ShortcutRegistration.IsOwned(Installation.DesktopShortcut, Installation.DefaultDirectory), Margin = new Padding(0, 0, 0, 10) };
+            root.Controls.Add(desktop);
             var launch = new CheckBox { Text = "Otwórz EasyShut po instalacji", AutoSize = true, Checked = true, Margin = new Padding(0, 0, 0, 15) };
             root.Controls.Add(launch);
             var error = new Label { AutoSize = true, ForeColor = Color.Firebrick, MaximumSize = new Size(470, 0), Visible = false };
@@ -339,7 +330,8 @@ namespace EasyShut
                 error.Visible = false;
                 try
                 {
-                    Installation.InstallDefault(); complete = true;
+                    Installation.InstallDefault(desktop.Checked); complete = true;
+                    desktop.Enabled = false;
                     description.Text = "EasyShut jest zainstalowany. Znajdziesz go w menu Start.\nW nowym oknie terminala możesz wpisać EasyShut lub EasyShut -help.";
                     install.Text = "Zakończ"; cancel.Visible = false;
                 }

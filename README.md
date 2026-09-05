@@ -10,13 +10,16 @@ Od wersji **1.2.1** program, okna i instalator używają wybranej ikony ES (D5 z
 
 1. **[Pobierz EasyShut-Setup.exe](https://github.com/szymongazinski/EasyShut/releases/latest/download/EasyShut-Setup.exe).**
 2. Otwórz pobrany plik **dwuklikiem** i kliknij **Zainstaluj**.
+   W instalatorze możesz zaznaczyć **Dodaj skrót na pulpicie**. Jeśli taki skrót już istnieje, opcja jest zaznaczona przy kolejnej aktualizacji. Pozostawienie jej odznaczonej nie usuwa istniejącego skrótu.
 3. Kliknij **Zakończ**. Domyślnie otworzy się okno EasyShut.
 
 Nie trzeba otwierać terminala ani uruchamiać plików `.ps1`. Instalator zawiera cały program i działa bez pobierania dodatkowych plików. Przy aktualizacji najpierw zamknij EasyShut.
 
 Instalacja nie wymaga administratora. Pliki trafiają do `%LOCALAPPDATA%\Programs\EasyShut`. Instalator dodaje skrót **EasyShut** do menu Start, polecenie `EasyShut` do PATH bieżącego użytkownika i pozycję EasyShut na liście zainstalowanych aplikacji Windows. Aby używać polecenia, otwórz **nowe okno terminala**. Wielkość liter w poleceniach Windows nie ma znaczenia, więc dotychczasowy zapis małymi literami nadal działa.
 
-Można też korzystać bez instalacji: pobierz `EasyShut-1.2.1-windows.zip` i wypakuj cały pakiet. `EasyShut-window.exe` otwiera okno, a `EasyShut.exe` obsługuje terminal. Pliki należy trzymać w jednym katalogu. Program korzysta z .NET Framework 4.8 dostępnego w aktualnych instalacjach Windows 10/11. Nie zawiera reklam ani telemetrii. Pliki EXE nie są podpisane certyfikatem wydawcy.
+Od wersji **1.2.2** skróty mają jawny identyfikator aplikacji, a instalator zgłasza ich utworzenie do Windows. EasyShut można znaleźć na liście aplikacji w menu Start oraz wyszukując jego nazwę; nie jest automatycznie przypinany do sekcji „Przypięte”. Opcjonalny skrót na pulpicie trafia do pulpitu wskazanego przez Windows, również przy przekierowaniu do OneDrive.
+
+Można też korzystać bez instalacji: pobierz `EasyShut-1.2.2-windows.zip` i wypakuj cały pakiet. `EasyShut-window.exe` otwiera okno, a `EasyShut.exe` obsługuje terminal. Pliki należy trzymać w jednym katalogu. Program korzysta z .NET Framework 4.8 dostępnego w aktualnych instalacjach Windows 10/11. Nie zawiera reklam ani telemetrii. Pliki EXE nie są podpisane certyfikatem wydawcy.
 
 ## Okno
 
@@ -100,7 +103,7 @@ Obsługa usypiania i ekranu zależy też od sprzętu, sterowników oraz polityk 
 
 Zamknij EasyShut, znajdź go w **Ustawienia → Aplikacje → Zainstalowane aplikacje** i wybierz **Odinstaluj**. Możesz też dwukrotnie kliknąć `EasyShut-uninstall.exe` w katalogu instalacji.
 
-Usuwane są pliki programu, skrót w menu Start i wpis w PATH. Inne pliki w katalogu pozostają nietknięte. Wersję przenośną z ZIP wystarczy zamknąć i usunąć jej wypakowany folder. Zapisane ustawienia zaawansowane pozostają w `%LOCALAPPDATA%\EasyShut`; aby je zresetować, po zamknięciu programu usuń `settings.xml` z tego folderu.
+Usuwane są pliki programu, jego skróty w menu Start i na pulpicie oraz wpis w PATH. Skróty prowadzące do innych programów i inne pliki w katalogu pozostają nietknięte. Wersję przenośną z ZIP wystarczy zamknąć i usunąć jej wypakowany folder. Zapisane ustawienia zaawansowane pozostają w `%LOCALAPPDATA%\EasyShut`; aby je zresetować, po zamknięciu programu usuń `settings.xml` z tego folderu.
 
 ## Budowanie i testy
 
@@ -118,4 +121,6 @@ Kompilacja korzysta z `csc.exe` dostarczanego z .NET Framework. Nie pobiera paki
 
 Testy integracyjne używają osobno kompilowanego backendu (`TESTING`) i osobnego kanału IPC. Ten backend nie zawiera kodu wyłączania, usypiania ani gaszenia ekranu; zapisuje tylko zdarzenia i pozwala symulować upływ czasu. Produkcyjne pliki EXE nie zawierają zegara testowego ani przełącznika wyłączającego rzeczywiste akcje.
 
-`Core.cs` zawiera parser i maszynę stanów sesji, `Ipc.cs` komunikację w ramach tego samego konta i sesji logowania, `Cli.cs` polecenia terminalowe, `Gui.cs` okna i obsługę w tle, `AdvancedWindow.cs` edytor ustawień, `Settings.cs` ich atomowy zapis, `NativePower.cs` wywołania Windows, a `Setup.cs` instalator i deinstalator. Licznik i żądanie zasilania należą do jednego wątku; nie ma zapisanych harmonogramów, zadań systemowych, usług ani połączeń sieciowych. Instalator pozwala też na wdrożenie przez `EasyShut-Setup.exe --install-silent` (kod wyjścia 0 oznacza sukces).
+`Core.cs` zawiera parser i maszynę stanów sesji, `Ipc.cs` komunikację w ramach tego samego konta i sesji logowania, `Cli.cs` polecenia terminalowe, `Gui.cs` okna i obsługę w tle, `AdvancedWindow.cs` edytor ustawień, `Settings.cs` ich atomowy zapis, `NativePower.cs` wywołania Windows, a `Setup.cs` instalator i deinstalator. `Shortcuts.cs` obsługuje skróty i ich wycofanie przy błędzie instalacji; `AppIdentity.cs` nadaje wspólny identyfikator aplikacji. Licznik i żądanie zasilania należą do jednego wątku; nie ma zapisanych harmonogramów, zadań systemowych, usług ani połączeń sieciowych.
+
+Instalacja z terminala: `EasyShut-Setup.exe --install-silent`. Dodanie skrótu na pulpicie: `EasyShut-Setup.exe --install-silent --desktop-shortcut`. Kod wyjścia `0` oznacza sukces. Bez drugiej flagi istniejący skrót na pulpicie pozostaje bez zmian. Są to opcje instalatora, nie flagi polecenia `EasyShut`.
