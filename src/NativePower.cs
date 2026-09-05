@@ -30,7 +30,7 @@ namespace EasyShut
             public MonitorWindow() { CreateHandle(new CreateParams { Caption = "EasyShut power" }); }
             public void Dispose() { DestroyHandle(); }
         }
-        public void Execute(PowerAction action)
+        public void Execute(PowerAction action, bool protectDocuments)
         {
             using (new ShutdownPrivilege())
             {
@@ -38,7 +38,7 @@ namespace EasyShut
                 {
                     if (!SetSuspendState(false, false, false)) throw new Win32Exception(Marshal.GetLastWin32Error());
                 }
-                else if (!InitiateSystemShutdownEx(null, "EasyShut: upłynął ustawiony czas.", 0, true, false, 0x80040000))
+                else if (!InitiateSystemShutdownEx(null, "EasyShut: upłynął ustawiony czas.", 0, !protectDocuments, false, 0x80040000))
                     throw new Win32Exception(Marshal.GetLastWin32Error());
             }
         }

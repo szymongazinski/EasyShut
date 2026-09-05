@@ -24,11 +24,13 @@ internal static class CoreTests
         Test("case insensitive flags", delegate { Equal(true, Parse("-N", "-SCREEN_ON").ScreenOn); });
         foreach (string flag in new[] { "-help", "--help", "-h", "/?" }) { string copy = flag; Test("help " + flag, delegate { Equal(CommandKind.Help, Parse(copy).Kind); }); }
         Test("status and stop", delegate { Equal(CommandKind.Status, Parse("-status").Kind); Equal(CommandKind.Stop, Parse("-stop").Kind); });
+        Test("pdoc is an explicit session override", delegate { Equal((bool?)true, Parse("1", "-pdoc").ProtectDocuments); Equal((bool?)null, Parse("1").ProtectDocuments); Equal((bool?)true, Parse("-n", "-pdoc").ProtectDocuments); });
         string[][] invalid = {
             new[]{"0"}, new[]{"-1"}, new[]{"NaN"}, new[]{"Infinity"}, new[]{"1e3"}, new[]{"1.2,3"}, new[]{"876001"}, new[]{"0.00001"},
             new[]{"1", "-n"}, new[]{"1", "-shut", "-sleep"}, new[]{"-n", "-shut", "-sleep"}, new[]{"-sleep"}, new[]{"-screen_on"},
             new[]{"-sleep", "1"}, new[]{"1", "2"}, new[]{"1", "-wat"}, new[]{"-n", "-n"}, new[]{"1", "-screen_on", "-screen_on"},
-            new[]{"+0"}, new[]{"+"}, new[]{"++1"}, new[]{"+1", "-screen_on"}, new[]{"-stop", "-n"}, new[]{"-status", "1"}, new[]{"-help", "1"}
+            new[]{"+0"}, new[]{"+"}, new[]{"++1"}, new[]{"+1", "-screen_on"}, new[]{"-stop", "-n"}, new[]{"-status", "1"}, new[]{"-help", "1"},
+            new[]{"-pdoc"}, new[]{"1", "-pdoc", "-pdoc"}, new[]{"+1", "-pdoc"}
         };
         foreach (var args in invalid) { var copy = args; Test("reject " + string.Join(" ", args), delegate { Throws(delegate { CommandLine.Parse(copy); }); }); }
         Test("never holds until stopped, no action", delegate { var f = new Fixture(); f.Session.Start(Parse("-n", "-screen_on")); f.Clock.Advance(1000000); f.Session.Tick(); Equal(0, f.Power.Actions.Count); Equal(true, f.Power.Held); f.Session.Stop(); Equal(false, f.Power.Held); Equal(false, f.Session.GetSnapshot().Active); });
@@ -53,6 +55,19 @@ internal static class CoreTests
         Test("native failure ends session without retry", delegate { var f = new Fixture(); f.Power.FailExecute = true; string error = null; f.Session.Failed += delegate(string value) { error = value; }; f.Session.Start(Parse("1")); f.Clock.Advance(3600); f.Session.Tick(); f.Session.Tick(); Equal(false, f.Session.GetSnapshot().Active); Equal(1, f.Power.Actions.Count); Equal(true, error != null); });
         Test("failed replacement keeps previous schedule", delegate { var f = new Fixture(); f.Session.Start(Parse("1")); f.Power.FailHold = true; Throws(delegate { f.Session.Start(Parse("-n")); }); Equal(TimeSpan.FromHours(1), f.Session.GetSnapshot().Remaining.Value); });
         Test("duration formatting over 24 hours", delegate { Equal("30:00:01", StatusText.Duration(TimeSpan.FromHours(30) + TimeSpan.FromMilliseconds(10))); });
+        Test("saved protection is used by unflagged session", delegate { var f = new Fixture(); var s = AdvancedSettings.Defaults(); s.ProtectDocuments = true; f.Session.Start(Parse("1"), s); f.Clock.Advance(3600); f.Session.Tick(); Equal(true, f.Power.Protected.Single()); });
+        Test("pdoc reaches the power backend", delegate { var f = new Fixture(); f.Session.Start(Parse("1", "-pdoc")); f.Clock.Advance(3600); f.Session.Tick(); Equal(true, f.Power.Protected.Single()); });
+        Test("default shutdown remains forced", delegate { var f = new Fixture(); f.Session.Start(Parse("1")); f.Clock.Advance(3600); f.Session.Tick(); Equal(false, f.Power.Protected.Single()); });
+        Test("saving protection updates active session without restarting", delegate { var f = new Fixture(); f.Session.Start(Parse("1")); f.Clock.Advance(200); var s = AdvancedSettings.Defaults(); s.ProtectDocuments = true; f.Session.Configure(s); Equal(TimeSpan.FromSeconds(3400), f.Session.GetSnapshot().Remaining.Value); f.Clock.Advance(3400); f.Session.Tick(); Equal(true, f.Power.Protected.Single()); });
+        Test("saved changes cannot turn off a pdoc override", delegate { var f = new Fixture(); f.Session.Start(Parse("1", "-pdoc")); f.Session.Configure(AdvancedSettings.Defaults()); Equal(true, f.Session.GetSnapshot().ProtectDocuments); });
+        Test("extension preserves pdoc and replacement drops it", delegate { var f = new Fixture(); f.Session.Start(Parse("1", "-pdoc")); f.Session.Extend(TimeSpan.FromHours(1)); Equal(true, f.Session.GetSnapshot().ProtectDocuments); f.Session.Start(Parse("1")); Equal(false, f.Session.GetSnapshot().ProtectDocuments); });
+        Test("empty warning list suppresses every warning", delegate { var f = new Fixture(); f.Session.Start(Parse("3"), new AdvancedSettings()); f.Clock.Advance(9900); f.Session.Tick(); f.Clock.Advance(840); f.Session.Tick(); Equal(0, f.Warnings.Count); });
+        Test("custom warnings replace default thresholds", delegate { var f = new Fixture(); var s = new AdvancedSettings(); s.Warnings.Add(new WarningRule { BeforeMinutes = 7 }); s.Warnings.Add(new WarningRule { BeforeMinutes = 2 }); f.Session.Start(Parse("1"), s); f.Clock.Advance(3180); f.Session.Tick(); f.Clock.Advance(300); f.Session.Tick(); Equal("7,2", string.Join(",", f.Warnings)); });
+        Test("warning minimum session duration is respected", delegate { var f = new Fixture(); var s = new AdvancedSettings(); s.Warnings.Add(new WarningRule { BeforeMinutes = 5, MinimumSessionHours = 2 }); f.Session.Start(Parse("1"), s); f.Clock.Advance(3300); f.Session.Tick(); Equal(0, f.Warnings.Count); });
+        Test("saving new overdue warning shows it on next tick", delegate { var f = new Fixture(); f.Session.Start(Parse("1"), new AdvancedSettings()); f.Clock.Advance(3500); var s = new AdvancedSettings(); s.Warnings.Add(new WarningRule { BeforeMinutes = 3 }); f.Session.Configure(s); f.Session.Tick(); Equal("3", string.Join(",", f.Warnings)); });
+        Test("removing warning prevents it from firing", delegate { var f = new Fixture(); f.Session.Start(Parse("1")); f.Session.Configure(new AdvancedSettings()); f.Clock.Advance(3550); f.Session.Tick(); Equal(0, f.Warnings.Count); });
+        Test("saving unrelated setting does not repeat fired warning", delegate { var f = new Fixture(); var s = AdvancedSettings.Defaults(); f.Session.Start(Parse("3"), s); f.Clock.Advance(9900); f.Session.Tick(); s.ProtectDocuments = true; f.Session.Configure(s); f.Session.Tick(); Equal("15", string.Join(",", f.Warnings)); });
+        Test("invalid warnings do not replace a running session", delegate { var f = new Fixture(); f.Session.Start(Parse("1")); var s = new AdvancedSettings(); s.Warnings.Add(new WarningRule { BeforeMinutes = 0 }); Throws(delegate { f.Session.Start(Parse("2"), s); }); Equal(TimeSpan.FromHours(1), f.Session.GetSnapshot().Remaining.Value); });
         Console.WriteLine(passed + " passed, " + failed + " failed");
         return failed == 0 ? 0 : 1;
     }
@@ -68,10 +83,11 @@ internal static class CoreTests
         public bool Held, ScreenOn, FailExecute, FailHold;
         public int ScreenOff;
         public readonly List<PowerAction> Actions = new List<PowerAction>();
+        public readonly List<bool> Protected = new List<bool>();
         public void Hold(bool screenOn) { if (FailHold) throw new InvalidOperationException("hold failure"); Held = true; ScreenOn = screenOn; }
         public void Release() { Held = false; }
         public void TurnScreenOff() { ScreenOff++; }
-        public void Execute(PowerAction action) { if (Held) throw new Exception("power hold not released"); Actions.Add(action); if (FailExecute) throw new Exception("action failure"); }
+        public void Execute(PowerAction action, bool protectDocuments) { if (Held) throw new Exception("power hold not released"); Actions.Add(action); Protected.Add(protectDocuments); if (FailExecute) throw new Exception("action failure"); }
         public void Dispose() { Release(); }
     }
     private sealed class Fixture

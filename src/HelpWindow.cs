@@ -37,6 +37,7 @@ namespace EasyShut
             Section(start, "2. Zdecyduj o ekranie", "Aby ekran był cały czas włączony, pozostaw opcję Wyłącz ekran niezaznaczoną. Po jej zaznaczeniu ekran zgaśnie 5 sekund od uruchomienia sesji.");
             Section(start, "3. Kliknij Uruchom", "Status zmieni się na licznik czasu lub Bez limitu. Od tej chwili EasyShut blokuje automatyczne usypianie Windows.");
             Section(start, "Jak zakończyć?", "Kliknij Anuluj sesję albo zamknij główne okno. Zminimalizowanie okna pozostawia sesję aktywną.");
+            Section(start, "Ustawienia zaawansowane", "Przycisk Zaawansowane obok pomocy otwiera ustawienia ostrzeżeń i ochrony dokumentów. Kliknij Zapisz, aby zastosować je teraz i zachować na kolejne uruchomienia.");
             Note(start, "W terminalu: EasyShut otwiera okno. Polecenia z czasem lub -n od razu uruchamiają sesję w tle.");
 
             TableLayoutPanel flags = Page("Flagi terminala");
@@ -49,6 +50,7 @@ namespace EasyShut
             Flag(table, "-shut", "Wyłącz komputer po czasie. Nie łącz z -sleep.");
             Flag(table, "-sleep", "Uśpij komputer po czasie. Nie łącz z -shut.");
             Flag(table, "-screen_on", "Utrzymuj ekran włączony przez całą sesję. Bez tej flagi ekran zgaśnie po 5 sekundach.");
+            Flag(table, "-pdoc", "Chroń niezapisane dokumenty w tej sesji. Bez flagi obowiązuje ustawienie zapisane w Zaawansowanych.");
             Flag(table, "+godziny", "Dodaj czas, np. +1 lub +0,5. Występuje samodzielnie. W trybie Nigdy nic nie zmienia.");
             Flag(table, "-status", "Wyświetl stan, pozostały czas i planowany termin akcji.");
             Flag(table, "-stop", "Anuluj sesję i zwolnij blokadę usypiania.");
@@ -60,6 +62,7 @@ namespace EasyShut
             Paragraph(examples, "Skopiuj wybrane polecenie i wklej je do terminala. Przycisk Kopiuj nie uruchamia polecenia.");
             Example(examples, "Bez limitu, z włączonym ekranem", "EasyShut -n -screen_on");
             Example(examples, "Wyłączenie za 15 minut; ekran pozostaje włączony", "EasyShut 0.25 -screen_on");
+            Example(examples, "Wyłączenie za godzinę z ochroną niezapisanych dokumentów", "EasyShut 1 -pdoc -screen_on");
             Example(examples, "Uśpienie za 90 minut; ekran zgaśnie po 5 sekundach", "EasyShut 1,5 -sleep");
             Example(examples, "Dodanie godziny do bieżącego odliczania", "EasyShut +1");
             Example(examples, "Sprawdzenie aktywnej sesji", "EasyShut -status");
@@ -67,9 +70,10 @@ namespace EasyShut
 
             TableLayoutPanel rules = Page("Zasady działania");
             Section(rules, "Zmiana czasu", "Nowe polecenie z czasem lub -n zastępuje bieżącą sesję. Polecenie +godziny wydłuża pozostały czas, zachowując akcję i ustawienie ekranu.");
-            Section(rules, "Ostrzeżenia", "Dla sesji trwających łącznie co najmniej 3 godziny: 15 minut przed akcją. Zawsze: minutę przed akcją. Dla czasu krótszego niż minuta ostrzeżenie pojawia się od razu.");
+            Section(rules, "Ostrzeżenia", "Listę ustawiasz w Zaawansowane → Ostrzeżenia. Domyślnie: 15 minut przed akcją dla sesji od 3 godzin i minutę przed dla każdej sesji. Można dodać własne czasy i usunąć wszystkie ostrzeżenia. Jeśli próg już minął, pojawi się najpilniejsze ostrzeżenie.");
             Section(rules, "Zamykanie okien i terminala", "Zamknięcie głównego okna anuluje sesję. Zamknięcie okna ostrzeżenia albo terminala nie anuluje odliczania. Możesz je zatrzymać przyciskiem Anuluj sesję lub poleceniem -stop.");
-            Section(rules, "Wyłączenie a dokumenty", "Wyłączenie wymusza zamknięcie aplikacji — niezapisane zmiany zostaną utracone. Uśpienie zachowuje otwarte aplikacje.");
+            Section(rules, "Wyłączenie a dokumenty", "Opcja ochrony w Zaawansowane → Inne lub flaga -pdoc pozwala aplikacjom zatrzymać wyłączenie, aby zapisać pracę. Bez ochrony EasyShut wymusza zamknięcie aplikacji i niezapisane zmiany mogą zostać utracone. Uśpienie zachowuje otwarte aplikacje.");
+            Section(rules, "Jedna instancja i zapis ustawień", "Kolejne uruchomienie przywołuje istniejące okno, także gdy program uruchomiono z innego folderu. Ustawienia zaawansowane są zapisywane dla konta Windows; odliczanie nadal jest zapominane po zamknięciu programu.");
             Section(rules, "Ustawienia Windows", "EasyShut nie zmienia planu zasilania. Po zakończeniu sesji obowiązują dotychczasowe ustawienia. Program nie uruchamia się sam po restarcie i nie blokuje ręcznego uśpienia.");
             Section(rules, "Obudzenie ekranu", "Ekran jest gaszony jednorazowo, po 5 sekundach od startu sesji. Możesz go potem obudzić myszą lub klawiaturą. Blokada usypiania i odliczanie nadal działają.");
 

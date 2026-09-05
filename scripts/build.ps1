@@ -7,11 +7,11 @@ if (-not (Test-Path -LiteralPath $compiler)) { throw 'Wymagany .NET Framework 4.
 $out = Join-Path $repo $(if ($TestBuild) { 'build\test' } else { 'build\release' })
 New-Item -ItemType Directory -Path $out -Force | Out-Null
 $common = @('/nologo', '/optimize+', '/warnaserror+', '/utf8output', '/codepage:65001', '/platform:anycpu', '/langversion:5', "/win32manifest:$repo\src\app.manifest")
-$sources = @("$repo\src\Core.cs", "$repo\src\Ipc.cs", "$repo\src\AssemblyInfo.cs")
+$sources = @("$repo\src\Core.cs", "$repo\src\Settings.cs", "$repo\src\Ipc.cs", "$repo\src\AssemblyInfo.cs")
 if ($TestBuild) { $common += '/define:TESTING' }
 & $compiler @common /target:exe "/out:$out\EasyShut.exe" @sources "$repo\src\Cli.cs"
 if ($LASTEXITCODE -ne 0) { throw 'Błąd kompilacji CLI.' }
-$gui = @('/target:winexe', "/out:$out\EasyShut-window.exe", '/reference:System.Windows.Forms.dll', '/reference:System.Drawing.dll') + $sources + @("$repo\src\Gui.cs", "$repo\src\HelpWindow.cs")
+$gui = @('/target:winexe', "/out:$out\EasyShut-window.exe", '/reference:System.Windows.Forms.dll', '/reference:System.Drawing.dll') + $sources + @("$repo\src\Gui.cs", "$repo\src\HelpWindow.cs", "$repo\src\AdvancedWindow.cs")
 if ($TestBuild) { $gui += "$repo\tests\TestPlatform.cs" } else { $gui += "$repo\src\NativePower.cs" }
 & $compiler @common @gui
 if ($LASTEXITCODE -ne 0) { throw 'Błąd kompilacji GUI.' }

@@ -7,6 +7,9 @@ $clock = Join-Path $testDir 'clock.txt'
 $log = Join-Path $testDir 'events.txt'
 $env:EASYSHUT_TEST_CLOCK = $clock
 $env:EASYSHUT_TEST_LOG = $log
+$settingsPath = Join-Path $testDir 'integration-settings.xml'
+$env:EASYSHUT_TEST_SETTINGS = $settingsPath
+if (Test-Path -LiteralPath $settingsPath) { Remove-Item -LiteralPath $settingsPath }
 [IO.File]::WriteAllText($clock, '0')
 [IO.File]::WriteAllText($log, '')
 function Set-Clock([double]$seconds) {
@@ -45,6 +48,9 @@ try {
     Set-Clock 15300
     Assert-Contains ([IO.File]::ReadAllText($log)) 'execute:Sleep'
     Assert-Contains (Invoke-Cli @('-n', '-screen_on')) 'Nigdy'
+    Assert-Contains (Invoke-Cli @('1', '-pdoc', '-screen_on')) 'Ochrona dokumentów: włączona'
+    Assert-Contains (Invoke-Cli @('1', '-screen_on')) 'Ochrona dokumentów: wyłączona'
+    Assert-Contains (Invoke-Cli @('-n', '-screen_on')) 'Nigdy'
     Assert-Contains (Invoke-Cli @('+1')) 'bez zmian'
     $beforeInvalid = Invoke-Cli @('-status')
     $null = Invoke-Cli @('1', '-shut', '-sleep') 2
@@ -61,4 +67,5 @@ try {
     Get-Process -Name 'EasyShut-window' -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq (Join-Path $testDir 'EasyShut-window.exe') } | Stop-Process
     Remove-Item Env:\EASYSHUT_TEST_CLOCK -ErrorAction SilentlyContinue
     Remove-Item Env:\EASYSHUT_TEST_LOG -ErrorAction SilentlyContinue
+    Remove-Item Env:\EASYSHUT_TEST_SETTINGS -ErrorAction SilentlyContinue
 }

@@ -34,7 +34,7 @@ namespace EasyShut
         public void Hold(bool screenOn) { Log("hold:" + screenOn); }
         public void Release() { Log("release"); }
         public void TurnScreenOff() { Log("screen-off"); }
-        public void Execute(PowerAction action) { Log("execute:" + action); }
+        public void Execute(PowerAction action, bool protectDocuments) { Log("execute:" + action); Log("protect:" + protectDocuments); }
         public void Dispose() { Release(); }
     }
 }

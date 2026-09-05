@@ -6,6 +6,8 @@ using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Text;
 using System.Threading;
+using System.Runtime.InteropServices;
+using Microsoft.Win32.SafeHandles;
 
 namespace EasyShut
 {
@@ -38,6 +40,11 @@ namespace EasyShut
             {
                 try { pipe.Connect(connectTimeout); }
                 catch (TimeoutException) { return false; }
+                if (args.Length == 0)
+                {
+                    uint processId;
+                    if (GetNamedPipeServerProcessId(pipe.SafePipeHandle, out processId)) AllowSetForegroundWindow(processId);
+                }
                 // Once connected, do not retry an uncertain command (especially +hours).
                 using (var writer = new StreamWriter(pipe, new UTF8Encoding(false), 1024, true))
                 using (var reader = new StreamReader(pipe, Encoding.UTF8, false, 1024, true))
@@ -55,6 +62,47 @@ namespace EasyShut
                     return true;
                 }
             }
+        }
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool GetNamedPipeServerProcessId(SafePipeHandle pipe, out uint serverProcessId);
+        [DllImport("user32.dll")] private static extern bool AllowSetForegroundWindow(uint processId);
+
+        public static void ShowExisting()
+        {
+            Reply reply;
+            var wait = Stopwatch.StartNew();
+            while (!TrySend(new string[0], out reply, 300))
+            {
+                if (wait.ElapsedMilliseconds > 10000) throw new IOException("Uruchomione EasyShut nie odpowiada. Spróbuj ponownie.");
+                Thread.Sleep(50);
+            }
+            if (!reply.Ok) throw new IOException(reply.Message);
+        }
+    }
+
+    public sealed class InstanceLock : IDisposable
+    {
+        private readonly System.Collections.Generic.List<Mutex> owned = new System.Collections.Generic.List<Mutex>();
+        public bool Acquired { get; private set; }
+        public InstanceLock()
+        {
+            // Also reserve the historical spelling, so portable/installed copies and
+            // older releases cannot each own a separate main window after a rename.
+            string current = @"Local\" + Ipc.Name + ".host";
+            foreach (string name in new[] { current, current.Replace("EasyShut.v1.", "easyshut.v1.") })
+            {
+                var mutex = new Mutex(false, name);
+                bool taken;
+                try { taken = mutex.WaitOne(0); } catch (AbandonedMutexException) { taken = true; }
+                if (!taken) { mutex.Dispose(); Dispose(); return; }
+                owned.Add(mutex);
+            }
+            Acquired = true;
+        }
+        public void Dispose()
+        {
+            foreach (Mutex mutex in owned) { mutex.ReleaseMutex(); mutex.Dispose(); }
+            owned.Clear(); Acquired = false;
         }
     }
 

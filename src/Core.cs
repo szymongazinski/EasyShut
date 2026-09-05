@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace EasyShut
 {
@@ -14,6 +15,7 @@ namespace EasyShut
         public TimeSpan? Duration;
         public PowerAction Action;
         public bool ScreenOn;
+        public bool? ProtectDocuments;
     }
 
     public static class CommandLine
@@ -32,6 +34,8 @@ Flagi:
   -sleep            Uśpij komputer po czasie; wyklucza -shut.
   -screen_on        Utrzymuj ekran włączony przez całą sesję.
                     Bez tej flagi ekran wyłączy się po 5 sekundach.
+  -pdoc             Chroń niezapisane dokumenty w tej sesji.
+                    Bez flagi obowiązuje wybór zapisany w Zaawansowanych.
   -status           Pokaż stan aktualnej sesji.
   -stop             Anuluj sesję i zwolnij blokadę usypiania.
 
@@ -46,9 +50,12 @@ Liczba godzin musi być pierwszym argumentem. +godziny występuje osobno.
 Ponowne uruchomienie z czasem lub -n zastępuje bieżące ustawienia.
 +godziny nie zmienia trybu Nigdy; bez sesji zgłasza błąd.
 Zamknięcie głównego okna anuluje również sesję uruchomioną z terminala.
-Ostrzeżenie: 15 min przed dla sesji >= 3 h oraz 1 min przed zawsze.
-Wyłączenie wymusza zamknięcie aplikacji, także z niezapisanymi dokumentami.
-Ustawienia Windows pozostają bez zmian. Brak autostartu i zapisu sesji.";
+Ostrzeżenia można dodawać i usuwać w oknie Zaawansowane.
+Domyślnie: 15 min przed dla sesji >= 3 h i 1 min przed zawsze.
+Ochrona dokumentów pozwala aplikacjom zatrzymać wyłączenie, aby zapisać pracę.
+Bez ochrony wyłączenie wymusza zamknięcie niezapisanych dokumentów.
+Ustawienia zaawansowane są zapamiętywane po kliknięciu Zapisz.
+Plan zasilania Windows pozostaje bez zmian. Brak autostartu i zapisu odliczania.";
 
         public static TimeSpan ParseHours(string text)
         {
@@ -81,7 +88,7 @@ Ustawienia Windows pozostają bez zmian. Brak autostartu i zapisu sesji.";
             {
                 RequireAlone(args); command.Kind = CommandKind.Extend; command.Duration = ParseHours(first.Substring(1)); return command;
             }
-            bool never = false, shut = false, sleep = false, screen = false;
+            bool never = false, shut = false, sleep = false, screen = false, pdoc = false;
             int start = 0;
             if (!first.StartsWith("-", StringComparison.Ordinal)) { command.Duration = ParseHours(first); start = 1; }
             for (int i = start; i < args.Length; i++)
@@ -92,6 +99,7 @@ Ustawienia Windows pozostają bez zmian. Brak autostartu i zapisu sesji.";
                     case "-shut": if (shut) Duplicate("-shut"); shut = true; break;
                     case "-sleep": if (sleep) Duplicate("-sleep"); sleep = true; break;
                     case "-screen_on": if (screen) Duplicate("-screen_on"); screen = true; break;
+                    case "-pdoc": if (pdoc) Duplicate("-pdoc"); pdoc = true; break;
                     default: throw new ArgumentException("Nieznany argument: " + args[i] + ". Użyj EasyShut -help.");
                 }
             }
@@ -101,6 +109,7 @@ Ustawienia Windows pozostają bez zmian. Brak autostartu i zapisu sesji.";
             command.Kind = CommandKind.Start;
             command.Action = sleep ? PowerAction.Sleep : PowerAction.Shutdown;
             command.ScreenOn = screen;
+            command.ProtectDocuments = pdoc ? true : (bool?)null;
             return command;
         }
         private static void RequireAlone(string[] args) { if (args.Length != 1) throw new ArgumentException("To polecenie musi występować samodzielnie."); }
@@ -119,7 +128,7 @@ Ustawienia Windows pozostają bez zmian. Brak autostartu i zapisu sesji.";
         void Hold(bool screenOn);
         void Release();
         void TurnScreenOff();
-        void Execute(PowerAction action);
+        void Execute(PowerAction action, bool protectDocuments);
     }
     public sealed class Snapshot
     {
@@ -129,6 +138,8 @@ Ustawienia Windows pozostają bez zmian. Brak autostartu i zapisu sesji.";
         public TimeSpan? Remaining;
         public TimeSpan? Total;
         public DateTimeOffset? EndsAt;
+        public bool ProtectDocuments;
+        public int WarningCount;
     }
 
     // All methods run on the host's UI thread. Both the monotonic clock and native
@@ -137,7 +148,10 @@ Ustawienia Windows pozostają bez zmian. Brak autostartu i zapisu sesji.";
     {
         private readonly IClock clock;
         private readonly IPower power;
-        private bool active, screenOn, warned15, warned1;
+        private bool active, screenOn;
+        private bool? protectOverride;
+        private AdvancedSettings settings = AdvancedSettings.Defaults();
+        private readonly HashSet<int> warned = new HashSet<int>();
         private TimeSpan? deadline, screenOffAt, total;
         private PowerAction action;
         public event Action<int> Warning;
@@ -146,17 +160,26 @@ Ustawienia Windows pozostają bez zmian. Brak autostartu i zapisu sesji.";
 
         public Session(IClock clock, IPower power) { this.clock = clock; this.power = power; }
 
-        public void Start(Command command)
+        public void Start(Command command, AdvancedSettings configuration = null)
         {
             if (command.Kind != CommandKind.Start) throw new ArgumentException("Nieprawidłowe polecenie startu.");
             if (command.Duration.HasValue && (command.Duration.Value < TimeSpan.FromSeconds(1) || command.Duration.Value.TotalHours > 876000))
                 throw new ArgumentException("Czas musi wynosić od 1 sekundy do 876000 godzin.");
+            AdvancedSettings next = (configuration ?? AdvancedSettings.Defaults()).Clone();
             power.Hold(command.ScreenOn);
+            settings = next; protectOverride = command.ProtectDocuments;
             active = true; screenOn = command.ScreenOn; action = command.Action;
             total = command.Duration;
             deadline = total.HasValue ? clock.Now + total.Value : (TimeSpan?)null;
             screenOffAt = screenOn ? (TimeSpan?)null : clock.Now + TimeSpan.FromSeconds(5);
-            warned15 = warned1 = false;
+            warned.Clear();
+        }
+
+        public void Configure(AdvancedSettings configuration)
+        {
+            AdvancedSettings next = configuration.Clone();
+            warned.RemoveWhere(minutes => !next.Warnings.Any(r => r.BeforeMinutes == minutes && settings.Warnings.Any(old => old.BeforeMinutes == minutes && old.MinimumSessionHours == r.MinimumSessionHours)));
+            settings = next;
         }
 
         public bool Extend(TimeSpan amount)
@@ -167,8 +190,7 @@ Ustawienia Windows pozostają bez zmian. Brak autostartu i zapisu sesji.";
                 throw new ArgumentException("Łączny czas nie może przekroczyć 876000 godzin; dodaj co najmniej 1 sekundę.");
             deadline += amount; total += amount;
             TimeSpan remaining = deadline.Value - clock.Now;
-            if (remaining > TimeSpan.FromMinutes(15)) warned15 = false;
-            if (remaining > TimeSpan.FromMinutes(1)) warned1 = false;
+            warned.RemoveWhere(minutes => remaining > TimeSpan.FromMinutes(minutes));
             return true;
         }
 
@@ -176,12 +198,13 @@ Ustawienia Windows pozostają bez zmian. Brak autostartu i zapisu sesji.";
         {
             TimeSpan? remaining = active && deadline.HasValue ? MaxZero(deadline.Value - clock.Now) : (TimeSpan?)null;
             return new Snapshot { Active = active, ScreenOn = screenOn, Action = action, Remaining = remaining,
-                Total = active ? total : null, EndsAt = remaining.HasValue ? clock.UtcNow + remaining.Value : (DateTimeOffset?)null };
+                Total = active ? total : null, EndsAt = remaining.HasValue ? clock.UtcNow + remaining.Value : (DateTimeOffset?)null,
+                ProtectDocuments = (active ? protectOverride : null) ?? settings.ProtectDocuments, WarningCount = settings.Warnings.Count };
         }
 
         public void Stop()
         {
-            active = false; deadline = screenOffAt = total = null; warned15 = warned1 = false;
+            active = false; deadline = screenOffAt = total = null; warned.Clear(); protectOverride = null;
             power.Release();
         }
 
@@ -192,8 +215,9 @@ Ustawienia Windows pozostają bez zmian. Brak autostartu i zapisu sesji.";
             if (remaining <= TimeSpan.Zero)
             {
                 PowerAction dueAction = action;
+                bool protectDocuments = protectOverride ?? settings.ProtectDocuments;
                 Stop(); // Clear before executing: never repeat a shutdown/sleep on resume or error.
-                try { power.Execute(dueAction); if (Completed != null) Completed(); }
+                try { power.Execute(dueAction, protectDocuments); if (Completed != null) Completed(); }
                 catch (Exception ex) { if (Failed != null) Failed("Nie udało się wykonać akcji: " + ex.Message); }
                 return;
             }
@@ -203,15 +227,15 @@ Ustawienia Windows pozostają bez zmian. Brak autostartu i zapisu sesji.";
                 try { power.TurnScreenOff(); }
                 catch (Exception ex) { if (Failed != null) Failed("Nie udało się wyłączyć ekranu: " + ex.Message); }
             }
-            if (remaining <= TimeSpan.FromMinutes(1) && !warned1)
+            if (!deadline.HasValue) return;
+            var due = settings.Warnings.Where(r => !warned.Contains(r.BeforeMinutes) &&
+                total.Value >= TimeSpan.FromHours((double)r.MinimumSessionHours) && remaining <= TimeSpan.FromMinutes(r.BeforeMinutes)).ToList();
+            if (due.Count > 0)
             {
-                warned1 = true; warned15 = true;
-                if (Warning != null) Warning(1);
-            }
-            else if (total.HasValue && total.Value >= TimeSpan.FromHours(3) && remaining <= TimeSpan.FromMinutes(15) && !warned15)
-            {
-                warned15 = true;
-                if (Warning != null) Warning(15);
+                // If ticks were missed, show only the most urgent warning and consume
+                // older thresholds so they cannot appear out of order on the next tick.
+                foreach (var rule in due) warned.Add(rule.BeforeMinutes);
+                if (Warning != null) Warning(due.Min(r => r.BeforeMinutes));
             }
         }
 
@@ -232,7 +256,8 @@ Ustawienia Windows pozostają bez zmian. Brak autostartu i zapisu sesji.";
                 ? (state.Action == PowerAction.Shutdown ? "Wyłączenie" : "Uśpienie") + " za " + Duration(state.Remaining.Value) +
                     " (" + state.EndsAt.Value.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss") + ")."
                 : "Nigdy — automatyczne usypianie zablokowane bez limitu.";
-            return mode + Environment.NewLine + (state.ScreenOn ? "Ekran pozostaje włączony." : "Ekran: wyłączenie po 5 sekundach od startu; można go obudzić myszą lub klawiaturą.");
+            return mode + Environment.NewLine + (state.ScreenOn ? "Ekran pozostaje włączony." : "Ekran: wyłączenie po 5 sekundach od startu; można go obudzić myszą lub klawiaturą.") +
+                Environment.NewLine + "Ochrona dokumentów: " + (state.ProtectDocuments ? "włączona." : "wyłączona.") + " Ostrzeżenia: " + state.WarningCount + ".";
         }
     }
 }

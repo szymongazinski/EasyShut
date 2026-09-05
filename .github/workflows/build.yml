@@ -18,10 +18,13 @@ jobs:
       - name: Test installer
         shell: pwsh
         run: ./scripts/installer-test.ps1
+      - name: Test single instance and persistent settings
+        shell: pwsh
+        run: ./scripts/instance-test.ps1
       - uses: actions/upload-artifact@v4
         with:
           name: EasyShut-windows
           path: |
             dist/EasyShut-Setup.exe
-            dist/EasyShut-1.1.1-windows.zip
+            dist/EasyShut-1.2.0-windows.zip
             dist/SHA256SUMS.txt
