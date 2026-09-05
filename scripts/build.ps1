@@ -11,7 +11,7 @@ $sources = @("$repo\src\Core.cs", "$repo\src\Ipc.cs", "$repo\src\AssemblyInfo.cs
 if ($TestBuild) { $common += '/define:TESTING' }
 & $compiler @common /target:exe "/out:$out\EasyShut.exe" @sources "$repo\src\Cli.cs"
 if ($LASTEXITCODE -ne 0) { throw 'Błąd kompilacji CLI.' }
-$gui = @('/target:winexe', "/out:$out\EasyShut-window.exe", '/reference:System.Windows.Forms.dll', '/reference:System.Drawing.dll') + $sources + @("$repo\src\Gui.cs")
+$gui = @('/target:winexe', "/out:$out\EasyShut-window.exe", '/reference:System.Windows.Forms.dll', '/reference:System.Drawing.dll') + $sources + @("$repo\src\Gui.cs", "$repo\src\HelpWindow.cs")
 if ($TestBuild) { $gui += "$repo\tests\TestPlatform.cs" } else { $gui += "$repo\src\NativePower.cs" }
 & $compiler @common @gui
 if ($LASTEXITCODE -ne 0) { throw 'Błąd kompilacji GUI.' }

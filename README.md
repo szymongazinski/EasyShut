@@ -14,7 +14,7 @@ Nie trzeba otwierać terminala ani uruchamiać plików `.ps1`. Instalator zawier
 
 Instalacja nie wymaga administratora. Pliki trafiają do `%LOCALAPPDATA%\Programs\EasyShut`. Instalator dodaje skrót **EasyShut** do menu Start, polecenie `EasyShut` do PATH bieżącego użytkownika i pozycję EasyShut na liście zainstalowanych aplikacji Windows. Aby używać polecenia, otwórz **nowe okno terminala**. Wielkość liter w poleceniach Windows nie ma znaczenia, więc dotychczasowy zapis małymi literami nadal działa.
 
-Można też korzystać bez instalacji: pobierz `EasyShut-1.1.0-windows.zip` i wypakuj cały pakiet. `EasyShut-window.exe` otwiera okno, a `EasyShut.exe` obsługuje terminal. Pliki należy trzymać w jednym katalogu. Program korzysta z .NET Framework 4.8 dostępnego w aktualnych instalacjach Windows 10/11. Nie zawiera reklam ani telemetrii. Pliki EXE nie są podpisane certyfikatem wydawcy.
+Można też korzystać bez instalacji: pobierz `EasyShut-1.1.1-windows.zip` i wypakuj cały pakiet. `EasyShut-window.exe` otwiera okno, a `EasyShut.exe` obsługuje terminal. Pliki należy trzymać w jednym katalogu. Program korzysta z .NET Framework 4.8 dostępnego w aktualnych instalacjach Windows 10/11. Nie zawiera reklam ani telemetrii. Pliki EXE nie są podpisane certyfikatem wydawcy.
 
 ## Okno
 
@@ -25,6 +25,7 @@ Można też korzystać bez instalacji: pobierz `EasyShut-1.1.0-windows.zip` i wy
 - **Anuluj sesję** zatrzymuje odliczanie i zwalnia blokadę usypiania. Okno pozostaje otwarte.
 - **Zamknięcie głównego okna kończy cały program i zapomina sesję**, także rozpoczętą wcześniej w terminalu. Zminimalizowanie okna pozostawia sesję aktywną.
 - Ponowne **Uruchom** zaczyna sesję od nowa z wybranymi ustawieniami.
+- **Pomoc / terminal** otwiera czytelną instrukcję z zakładkami: szybki start, flagi, przykłady do skopiowania i zasady działania. Okno można powiększać; długie opisy zawijają się automatycznie.
 
 ## Terminal
 

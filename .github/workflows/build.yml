@@ -23,5 +23,5 @@ jobs:
           name: EasyShut-windows
           path: |
             dist/EasyShut-Setup.exe
-            dist/EasyShut-1.1.0-windows.zip
+            dist/EasyShut-1.1.1-windows.zip
             dist/SHA256SUMS.txt

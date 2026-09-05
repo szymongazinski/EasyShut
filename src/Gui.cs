@@ -274,11 +274,7 @@ namespace EasyShut
         public void ShowError(string message) { error.Text = message; error.Visible = true; }
         private void ShowHelp()
         {
-            using (var form = new Form { Text = "EasyShut — pomoc", Font = Font, Size = new Size(710, 590), StartPosition = FormStartPosition.CenterParent, MinimizeBox = false, MaximizeBox = false })
-            {
-                form.Controls.Add(new TextBox { Multiline = true, ReadOnly = true, ScrollBars = ScrollBars.Vertical, Dock = DockStyle.Fill, Text = CommandLine.Help, Font = new Font("Consolas", 10), BackColor = SystemColors.Window });
-                form.ShowDialog(this);
-            }
+            using (var form = new HelpWindow()) form.ShowDialog(this);
         }
     }
 

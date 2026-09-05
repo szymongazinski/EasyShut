@@ -15,7 +15,7 @@ namespace EasyShut
 {
     public static class Installation
     {
-        public const string Version = "1.1.0";
+        public const string Version = "1.1.1";
         private const string UninstallKey = @"Software\Microsoft\Windows\CurrentVersion\Uninstall\EasyShut";
         public static readonly string[] PayloadNames = {
             "EasyShut.exe", "EasyShut-window.exe", "EasyShut-uninstall.exe",
