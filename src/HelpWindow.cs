@@ -5,7 +5,7 @@ using System.Windows.Forms;
 
 namespace EasyShut
 {
-    internal sealed class HelpWindow : Form
+    internal sealed class HelpWindow : IconForm
     {
         private readonly Font headingFont = new Font("Segoe UI", 11, FontStyle.Bold);
         private readonly Font commandFont = new Font("Consolas", 10);
@@ -21,7 +21,6 @@ namespace EasyShut
             MinimumSize = new Size(660, 520);
             StartPosition = FormStartPosition.CenterParent;
             MinimizeBox = false;
-            Icon = AppIcon.Value;
 
             var root = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 3, Padding = new Padding(18, 14, 18, 12) };
             root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));

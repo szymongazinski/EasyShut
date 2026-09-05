@@ -4,7 +4,7 @@ Mała aplikacja dla Windows 10/11, która na czas bieżącej sesji blokuje autom
 
 **[Pobierz gotowy program](https://github.com/szymongazinski/EasyShut/releases/latest)** · [Licencja MIT](LICENSE)
 
-Od wersji **1.2.1** program, okna i instalator używają wybranej ikony ES (D5 z dłuższą i grubszą kreską zasilania).
+Program, okna i instalator używają wybranej ikony ES (D5 z dłuższą i grubszą kreską zasilania). Od wersji **1.2.3** jasne paski tytułu mają czarną ikonę, a ikona działającego programu na pasku zadań dobiera kolor do jasnego lub ciemnego motywu systemu. Dotyczy to również pomocy, ustawień, ostrzeżeń i instalatora. Zmiana motywu podczas pracy odświeża ikony.
 
 ## Instalacja
 
@@ -19,7 +19,7 @@ Instalacja nie wymaga administratora. Pliki trafiają do `%LOCALAPPDATA%\Program
 
 Od wersji **1.2.2** skróty mają jawny identyfikator aplikacji, a instalator zgłasza ich utworzenie do Windows. EasyShut można znaleźć na liście aplikacji w menu Start oraz wyszukując jego nazwę; nie jest automatycznie przypinany do sekcji „Przypięte”. Opcjonalny skrót na pulpicie trafia do pulpitu wskazanego przez Windows, również przy przekierowaniu do OneDrive.
 
-Można też korzystać bez instalacji: pobierz `EasyShut-1.2.2-windows.zip` i wypakuj cały pakiet. `EasyShut-window.exe` otwiera okno, a `EasyShut.exe` obsługuje terminal. Pliki należy trzymać w jednym katalogu. Program korzysta z .NET Framework 4.8 dostępnego w aktualnych instalacjach Windows 10/11. Nie zawiera reklam ani telemetrii. Pliki EXE nie są podpisane certyfikatem wydawcy.
+Można też korzystać bez instalacji: pobierz `EasyShut-1.2.3-windows.zip` i wypakuj cały pakiet. `EasyShut-window.exe` otwiera okno, a `EasyShut.exe` obsługuje terminal. Pliki należy trzymać w jednym katalogu. Program korzysta z .NET Framework 4.8 dostępnego w aktualnych instalacjach Windows 10/11. Nie zawiera reklam ani telemetrii. Pliki EXE nie są podpisane certyfikatem wydawcy.
 
 ## Okno
 

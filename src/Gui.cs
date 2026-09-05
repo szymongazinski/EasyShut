@@ -173,7 +173,7 @@ namespace EasyShut
         }
     }
 
-    internal sealed class MainWindow : Form
+    internal sealed class MainWindow : IconForm
     {
         private readonly RadioButton quarter = Choice("15 minut"), hour = Choice("1 godzina"), six = Choice("6 godzin"), never = Choice("Nigdy"), custom = Choice("Własny czas:");
         private readonly TextBox hours = new TextBox { Width = 86, Text = "1,5", AccessibleName = "Liczba godzin", Enabled = false };
@@ -204,7 +204,6 @@ namespace EasyShut
             AutoSize = true; AutoSizeMode = AutoSizeMode.GrowAndShrink;
             FormBorderStyle = FormBorderStyle.FixedSingle; MaximizeBox = false;
             StartPosition = FormStartPosition.CenterScreen;
-            Icon = AppIcon.Value;
             var root = new TableLayoutPanel { AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, ColumnCount = 1, Padding = new Padding(18), Dock = DockStyle.Fill };
             root.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 500));
             root.Controls.Add(new Label { Text = "EasyShut", AutoSize = true, Font = new Font(Font.FontFamily, 15, FontStyle.Bold), Margin = new Padding(0, 0, 0, 5) });
@@ -324,7 +323,7 @@ namespace EasyShut
         }
     }
 
-    internal sealed class WarningWindow : Form
+    internal sealed class WarningWindow : IconForm
     {
         private readonly Label time = new Label { AutoSize = true, Font = new Font("Segoe UI", 20) };
         private readonly Label detail = new Label { AutoSize = true, MaximumSize = new Size(420, 0) };
@@ -336,7 +335,6 @@ namespace EasyShut
             FormBorderStyle = FormBorderStyle.FixedDialog; MaximizeBox = MinimizeBox = false;
             AutoSize = true; AutoSizeMode = AutoSizeMode.GrowAndShrink;
             StartPosition = FormStartPosition.CenterScreen; TopMost = true;
-            Icon = AppIcon.Value;
             var root = new FlowLayoutPanel { AutoSize = true, FlowDirection = FlowDirection.TopDown, WrapContents = false, Dock = DockStyle.Fill, Padding = new Padding(22) };
             root.Controls.Add(new Label { Text = "Ostrzeżenie: " + minutes + " min przed zaplanowaną akcją.", AutoSize = true });
             root.Controls.Add(time); root.Controls.Add(detail);

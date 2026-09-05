@@ -15,7 +15,7 @@ namespace EasyShut
 {
     public static class Installation
     {
-        public const string Version = "1.2.2";
+        public const string Version = "1.2.3";
         private const string UninstallKey = @"Software\Microsoft\Windows\CurrentVersion\Uninstall\EasyShut";
         public static readonly string[] PayloadNames = {
             "EasyShut.exe", "EasyShut-window.exe", "EasyShut-uninstall.exe",
@@ -288,12 +288,11 @@ namespace EasyShut
     }
 
 #if !UNINSTALL
-    internal sealed class SetupWindow : Form
+    internal sealed class SetupWindow : IconForm
     {
         public SetupWindow()
         {
             Text = "EasyShut — instalator";
-            Icon = AppIcon.Value;
             Font = new Font("Segoe UI", 9);
             AutoScaleMode = AutoScaleMode.Dpi;
             AutoSize = true; AutoSizeMode = AutoSizeMode.GrowAndShrink;

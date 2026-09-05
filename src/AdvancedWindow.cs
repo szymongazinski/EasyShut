@@ -5,7 +5,7 @@ using System.Windows.Forms;
 
 namespace EasyShut
 {
-    internal sealed class AdvancedWindow : Form
+    internal sealed class AdvancedWindow : IconForm
     {
         private AdvancedSettings draft;
         private readonly ListView rules = new ListView { View = View.Details, FullRowSelect = true, MultiSelect = false, HideSelection = false, Dock = DockStyle.Fill };
@@ -20,7 +20,6 @@ namespace EasyShut
         {
             draft = settings.Clone();
             Text = "EasyShut — zaawansowane";
-            Icon = AppIcon.Value;
             Font = new Font("Segoe UI", 9.5F);
             AutoScaleMode = AutoScaleMode.Dpi;
             ClientSize = new Size(620, 525); MinimumSize = new Size(590, 540);
