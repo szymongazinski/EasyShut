@@ -1,0 +1,21 @@
+{
+  "lettersUnchanged": true,
+  "barWidthBefore": 32,
+  "barWidthAfter": 36,
+  "barCenterlineBefore": [
+    100,
+    140
+  ],
+  "barCenterlineAfter": [
+    92,
+    146
+  ],
+  "visibleBarLengthBefore": 72,
+  "visibleBarLengthAfter": 90,
+  "powerBarGapAt512px": 10.07207,
+  "pngWidth": 1024,
+  "pngHeight": 1024,
+  "allVisiblePixelsWhite": true,
+  "transparentPixels": 856100,
+  "opaquePixels": 185997
+}
