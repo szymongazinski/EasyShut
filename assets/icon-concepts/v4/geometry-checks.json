@@ -1,0 +1,38 @@
+[
+  {
+    "id": "D1-subtelny",
+    "powerBarGapAt512px": 10.62898,
+    "letterGapAt512px": 25.33076,
+    "maxSampleDisplacementFromD": 5.22993
+  },
+  {
+    "id": "D2-lagodny-obrys",
+    "powerBarGapAt512px": 10.39686,
+    "letterGapAt512px": 25.62559,
+    "maxSampleDisplacementFromD": 10.45948
+  },
+  {
+    "id": "D3-luki-kola",
+    "powerBarGapAt512px": 8.78048,
+    "letterGapAt512px": 24.89324,
+    "maxSampleDisplacementFromD": 16.59093
+  },
+  {
+    "id": "D4-otwarte-koncowki",
+    "powerBarGapAt512px": 10.39686,
+    "letterGapAt512px": 25.62558,
+    "maxSampleDisplacementFromD": 13.79012
+  },
+  {
+    "id": "D5-lagodniejsze-petle",
+    "powerBarGapAt512px": 16.12652,
+    "letterGapAt512px": 24.36994,
+    "maxSampleDisplacementFromD": 13.85919
+  },
+  {
+    "id": "D-baza",
+    "powerBarGapAt512px": 10.90284,
+    "letterGapAt512px": 25.10053,
+    "maxSampleDisplacementFromD": 0
+  }
+]

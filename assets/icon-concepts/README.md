@@ -1,6 +1,6 @@
 # Propozycje ikony EasyShut
 
-**Aktualny zestaw: [4 pionowe warianty wybranej opcji 3 — ściśnięte S i niższa kreska](v3/README.md).** Wcześniejsze [6 propozycji pionowych i poziomych](v2/README.md) oraz poniższe projekty pozostawiono jako archiwum.
+**Aktualny zestaw: [5 eksperymentów blisko wybranego D — łuki S bliżej koła](v4/README.md).** Wcześniejsze [4 warianty pionowe](v3/README.md), [6 propozycji pionowych i poziomych](v2/README.md) oraz poniższe projekty pozostawiono jako archiwum.
 
 Pięć wariantów do wyboru. Każdy przedstawia białe, zaokrąglone E i S tworzące okrągły znak z osobną kreską zasilania na górze.
 
