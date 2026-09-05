@@ -203,7 +203,7 @@ namespace EasyShut
             AutoSize = true; AutoSizeMode = AutoSizeMode.GrowAndShrink;
             FormBorderStyle = FormBorderStyle.FixedSingle; MaximizeBox = false;
             StartPosition = FormStartPosition.CenterScreen;
-            Icon = SystemIcons.Application;
+            Icon = AppIcon.Value;
             var root = new TableLayoutPanel { AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, ColumnCount = 1, Padding = new Padding(18), Dock = DockStyle.Fill };
             root.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 500));
             root.Controls.Add(new Label { Text = "EasyShut", AutoSize = true, Font = new Font(Font.FontFamily, 15, FontStyle.Bold), Margin = new Padding(0, 0, 0, 5) });
@@ -335,7 +335,7 @@ namespace EasyShut
             FormBorderStyle = FormBorderStyle.FixedDialog; MaximizeBox = MinimizeBox = false;
             AutoSize = true; AutoSizeMode = AutoSizeMode.GrowAndShrink;
             StartPosition = FormStartPosition.CenterScreen; TopMost = true;
-            Icon = SystemIcons.Warning;
+            Icon = AppIcon.Value;
             var root = new FlowLayoutPanel { AutoSize = true, FlowDirection = FlowDirection.TopDown, WrapContents = false, Dock = DockStyle.Fill, Padding = new Padding(22) };
             root.Controls.Add(new Label { Text = "Ostrzeżenie: " + minutes + " min przed zaplanowaną akcją.", AutoSize = true });
             root.Controls.Add(time); root.Controls.Add(detail);

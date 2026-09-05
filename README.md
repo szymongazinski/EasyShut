@@ -4,6 +4,8 @@ Mała aplikacja dla Windows 10/11, która na czas bieżącej sesji blokuje autom
 
 **[Pobierz gotowy program](https://github.com/szymongazinski/EasyShut/releases/latest)** · [Licencja MIT](LICENSE)
 
+Od wersji **1.2.1** program, okna i instalator używają wybranej ikony ES (D5 z dłuższą i grubszą kreską zasilania).
+
 ## Instalacja
 
 1. **[Pobierz EasyShut-Setup.exe](https://github.com/szymongazinski/EasyShut/releases/latest/download/EasyShut-Setup.exe).**
@@ -14,7 +16,7 @@ Nie trzeba otwierać terminala ani uruchamiać plików `.ps1`. Instalator zawier
 
 Instalacja nie wymaga administratora. Pliki trafiają do `%LOCALAPPDATA%\Programs\EasyShut`. Instalator dodaje skrót **EasyShut** do menu Start, polecenie `EasyShut` do PATH bieżącego użytkownika i pozycję EasyShut na liście zainstalowanych aplikacji Windows. Aby używać polecenia, otwórz **nowe okno terminala**. Wielkość liter w poleceniach Windows nie ma znaczenia, więc dotychczasowy zapis małymi literami nadal działa.
 
-Można też korzystać bez instalacji: pobierz `EasyShut-1.2.0-windows.zip` i wypakuj cały pakiet. `EasyShut-window.exe` otwiera okno, a `EasyShut.exe` obsługuje terminal. Pliki należy trzymać w jednym katalogu. Program korzysta z .NET Framework 4.8 dostępnego w aktualnych instalacjach Windows 10/11. Nie zawiera reklam ani telemetrii. Pliki EXE nie są podpisane certyfikatem wydawcy.
+Można też korzystać bez instalacji: pobierz `EasyShut-1.2.1-windows.zip` i wypakuj cały pakiet. `EasyShut-window.exe` otwiera okno, a `EasyShut.exe` obsługuje terminal. Pliki należy trzymać w jednym katalogu. Program korzysta z .NET Framework 4.8 dostępnego w aktualnych instalacjach Windows 10/11. Nie zawiera reklam ani telemetrii. Pliki EXE nie są podpisane certyfikatem wydawcy.
 
 ## Okno
 

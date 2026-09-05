@@ -15,7 +15,7 @@ namespace EasyShut
 {
     public static class Installation
     {
-        public const string Version = "1.2.0";
+        public const string Version = "1.2.1";
         private const string UninstallKey = @"Software\Microsoft\Windows\CurrentVersion\Uninstall\EasyShut";
         public static readonly string[] PayloadNames = {
             "EasyShut.exe", "EasyShut-window.exe", "EasyShut-uninstall.exe",
@@ -203,6 +203,7 @@ namespace EasyShut
                     try
                     {
                         link.TargetPath = Path.Combine(target, "EasyShut-window.exe");
+                        link.IconLocation = Path.Combine(target, "EasyShut-window.exe") + ",0";
                         link.WorkingDirectory = target;
                         link.Description = "EasyShut — blokada usypiania i odliczanie";
                         link.Save();
@@ -303,6 +304,7 @@ namespace EasyShut
         public SetupWindow()
         {
             Text = "EasyShut — instalator";
+            Icon = AppIcon.Value;
             Font = new Font("Segoe UI", 9);
             AutoScaleMode = AutoScaleMode.Dpi;
             AutoSize = true; AutoSizeMode = AutoSizeMode.GrowAndShrink;

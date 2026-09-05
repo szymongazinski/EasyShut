@@ -20,6 +20,7 @@ namespace EasyShut
         {
             draft = settings.Clone();
             Text = "EasyShut — zaawansowane";
+            Icon = AppIcon.Value;
             Font = new Font("Segoe UI", 9.5F);
             AutoScaleMode = AutoScaleMode.Dpi;
             ClientSize = new Size(620, 525); MinimumSize = new Size(590, 540);

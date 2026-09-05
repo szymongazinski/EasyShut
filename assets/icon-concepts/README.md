@@ -1,6 +1,6 @@
 # Propozycje ikony EasyShut
 
-**Aktualna propozycja: [D5 z lekko grubszą i dłuższą kreską zasilania](v5/README.md).** Wcześniejsze [5 eksperymentów blisko D](v4/README.md), [4 warianty pionowe](v3/README.md), [6 propozycji pionowych i poziomych](v2/README.md) oraz poniższe projekty pozostawiono jako archiwum.
+**Wybrana ikona programu: [D5 z lekko grubszą i dłuższą kreską zasilania](v5/README.md), używana od wersji 1.2.1.** Gotowe zasoby są [w katalogu assets](../README.md). Wcześniejsze [5 eksperymentów blisko D](v4/README.md), [4 warianty pionowe](v3/README.md), [6 propozycji pionowych i poziomych](v2/README.md) oraz poniższe projekty pozostawiono jako archiwum.
 
 Pięć wariantów do wyboru. Każdy przedstawia białe, zaokrąglone E i S tworzące okrągły znak z osobną kreską zasilania na górze.
 
@@ -20,4 +20,4 @@ Pierwsze propozycje powstały przy użyciu wbudowanego narzędzia generowania ob
 
 Źródłem konstrukcji jest `generate.mjs`. Odtworzenie plików wymaga Node.js i pakietu `sharp`: `node generate.mjs`. Ten skrypt nie jest częścią budowania aplikacji ani jej zależności.
 
-Żaden wariant nie został jeszcze ustawiony jako ikona programu — zestaw służy do wyboru projektu.
+Powyższy pierwszy zestaw pozostaje archiwum; do programu wybrano późniejszy wariant D5 z rundy v5.
