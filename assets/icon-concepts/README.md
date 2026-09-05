@@ -1,5 +1,7 @@
 # Propozycje ikony EasyShut
 
+**Aktualny zestaw: [6 poprawionych propozycji — pionowe i poziome](v2/README.md).** Poniższe wcześniejsze projekty pozostawiono jako archiwum. W nowym zestawie E ma jedną wewnętrzną kreskę, a warianty pionowe układają obrócone S nad obróconym E.
+
 Pięć wariantów do wyboru. Każdy przedstawia białe, zaokrąglone E i S tworzące okrągły znak z osobną kreską zasilania na górze.
 
 ![Porównanie pięciu ikon](porownanie.png)
