@@ -1,0 +1,42 @@
+[
+  {
+    "variant": "A-delikatny",
+    "barToSGapAt512px": 11.5536,
+    "sScaleX": 0.94,
+    "sScaleY": 1,
+    "powerBarTop": 85,
+    "powerBarBottom": 125
+  },
+  {
+    "variant": "B-umiarkowany",
+    "barToSGapAt512px": 10.0862,
+    "sScaleX": 0.9,
+    "sScaleY": 0.95,
+    "powerBarTop": 92,
+    "powerBarBottom": 132
+  },
+  {
+    "variant": "C-okragly",
+    "barToSGapAt512px": 11.0221,
+    "sScaleX": 0.88,
+    "sScaleY": 0.9,
+    "powerBarTop": 96,
+    "powerBarBottom": 136
+  },
+  {
+    "variant": "D-zwarty",
+    "barToSGapAt512px": 10.9028,
+    "sScaleX": 0.85,
+    "sScaleY": 0.86,
+    "powerBarTop": 100,
+    "powerBarBottom": 140
+  },
+  {
+    "variant": "baza-opcja-3",
+    "barToSGapAt512px": 46.6568,
+    "sScaleX": 1,
+    "sScaleY": 1,
+    "powerBarTop": 36,
+    "powerBarBottom": 76
+  }
+]
